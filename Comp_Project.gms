@@ -36,11 +36,11 @@ t = pbar('ROW') - pbar('USA');
 *varibales - will have to have more specefic to primary and secondary
 positive variable Qd(r), Qs(r);
 positive variable X "exports"; 
-variable W "total welfare, target of optimization";
+variable W "total welfare";
 
 *will have to have market clearing for different countries and primary/secondary once added 
 *also will have to add different constrains ie EU restiricitions on secondary exports once 2027....
-equation objfn, market_clearing_USA, market_clearng_ROW, trade_balance;
+equation objfn, market_clearing_USA, market_clearing_ROW;
 
 objfn.. W =e=  
    sum(r, a(r) * Qd(r) + b(r) * Qd(r) *Qd(r) /2 - c(r) * Qs(r) - d(r) *Qs(r) * Qs(r) / 2 ) - t * X;
@@ -57,7 +57,6 @@ rep("BAU", "Qs",r) = Qs.l(r);
 rep("BAU", "P", "USA") = market_clearing_USA.m;
 rep("BAU", "P", "ROW") = market_clearing_ROW.m;
 
-execute_unload "alldata_simple.gdx" ;
+execute_unload "simple.gdx" ;
 
 
-*now converting to MPC i can add the tariff stuff 
