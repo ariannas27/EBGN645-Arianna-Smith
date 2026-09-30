@@ -40,7 +40,7 @@ variable W "total welfare, target of optimization";
 
 *will have to have market clearing for different countries and primary/secondary once added 
 *also will have to add different constrains ie EU restiricitions on secondary exports once 2027....
-equation objfn, market_clearing_USA, market_clearng_ROW, trade_balance;
+equation objfn, market_clearing_USA, market_clearing_ROW, trade_balance;
 
 objfn.. W =e=  
    sum(r, a(r) * Qd(r) + b(r) * Qd(r) *Qd(r) /2 - c(r) * Qs(r) - d(r) *Qs(r) * Qs(r) / 2 ) - t * X;
