@@ -10,21 +10,21 @@ set al /primary, secondary/;
 *parameters = essentially cost curves, FIND BETTER NUMBERS - currently using rough estimated numbers from AI 
 *prices USD/metric ton , qty = metric tons , currently total aluminum (primary + secondary) 
 parameter 
-****NUMBERS ARE PRETTY RANDOM NEED TO SEARCH FOR BETTER DATA"
+****NUMBERS ARE PRETTY RANDOM NEED TO SEARCH FOR BETTER DATA
 *price of aluminum USA and ROW 
 pbar(r,al) /USA.primary 2855, USA.secondary 100, ROW.primary 100, ROW.secondary 2420/,
 *qty supplied aluminum USA and ROW 
 qbar_s(r,al) /USA.primary 2236000, USA.secondary 100, ROW.primary 96000000, ROW.secondary 100/,
 *qty demanded aluminum USA and ROW
 qbar_d(r,al) /USA.primary 5830000, USA.secondary 100, ROW.primary 92406000, ROW.secondary 100/,
-**should break out elasticities more or keep as just supply and demand generally? 
+**should break out elasticities more 
 *elasticity of supply generally 
 e_s /0.4/
 *elasticity of demand generally 
 e_d /-0.4/;
 
 *currently based off of Pd = a + b*Qd, Ps = c + d*Qs, where a,b,c,d are parameters
-*will have to break out for primary and secondary aluminun and include the different elasticities for each country
+* elasticities for each country/for primary and secondary 
 parameter a(r,al),b(r,al),c(r,al),d(r,al); 
 
 *is this right?
@@ -35,7 +35,7 @@ c(r,al) = pbar(r,al) - d(r,al) * qbar_s(r,al);
 
 *t will essentially be the cost of transportation/logistics?
 parameter t(al) ;
-*!!! here you'll want to make sure that the prices for primary in ROW > USA, and vice versa for secondary
+*!!! here you'll want to make sure that the prices for primary in ROW > USA, and vice versa for secondary!!!!
 t("primary") = pbar('ROW',"primary") - pbar('USA',"primary");
 t("secondary") = pbar('USA',"secondary") - pbar('ROW',"secondary");
 
