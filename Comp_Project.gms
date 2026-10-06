@@ -10,17 +10,17 @@ set al /primary, secondary/;
 *parameters = essentially cost curves, FIND BETTER NUMBERS - currently using rough estimated numbers from AI 
 *prices USD/metric ton , qty = metric tons , currently total aluminum (primary + secondary) 
 parameter 
-****NUMBERS ARE PRETTY RANDOM NEED TO SEARCH FOR BETTER DATA
+****NUMBERS ARE PRETTY RANDOM NEED TO SEARCH FOR BETTER DATA**************
 *!!!!!!!!!!!!!!!!price of aluminum- Prices for Importers need to be higher than the exporters!!!!!!!!!!!!!!!! 
-pbar(r,al) /USA.primary 2855, USA.secondary 100, EU.primary 100, EU.secondary 2420, OECD.primary 100, OECD.secondary 2420, N_OECD.primary 100, N_OECD.secondary 2420/,
+pbar(r,al) /USA.primary 5500, USA.secondary 3100, EU.primary 3700, EU.secondary 3300, OECD.primary 3550, OECD.secondary 3100, N_OECD.primary 3150, N_OECD.secondary 3500/,
 *qty supplied aluminum USA and ROW 
-qbar_s(r,al) /USA.primary 2236000, USA.secondary 100, EU.primary 96000000, EU.secondary 100, OECD.primary 96000000, OECD.secondary 100, N_OECD.primary 96000000, N_OECD.secondary 100/,
+qbar_s(r,al) /USA.primary 700000, USA.secondary 5000000, EU.primary 3000000, EU.secondary 6900000, OECD.primary 7300000, OECD.secondary 5300000, N_OECD.primary 62000000, N_OECD.secondary 12800000/,
 *qty demanded aluminum USA and ROW
-qbar_d(r,al) /USA.primary 5830000, USA.secondary 100, EU.primary 92406000, EU.secondary 100, OECD.primary 100, OECD.secondary 100, N_OECD.primary 100, N_OECD.secondary 100/,
+qbar_d(r,al) /USA.primary 3500000, USA.secondary 3300000, EU.primary 7500000, EU.secondary 6200000, OECD.primary 4500000, OECD.secondary 4500000, N_OECD.primary 57500000, N_OECD.secondary 16000000/,
 **!!!!!if issue w elasticity go back to generally for now - not broken out to primary and secondary/regions  
 *elasticity of supply
-e_s(r,al) /USA.primary 0.4, USA.secondary 0.4, EU.primary 0.4, EU.secondary 0.4, OECD.primary 0.4, OECD.secondary 0.4, N_OECD.primary 0.4, N_OECD.secondary 0.4/;
-*elasticity of demand for primary & secondary 
+e_s(r,al) /USA.primary 0.4, USA.secondary 0.4, EU.primary 0.4, EU.secondary 0.4, OECD.primary 0.4, OECD.secondary 0.4, N_OECD.primary 0.4, N_OECD.secondary 0.4/,
+*elasticity of demand 
 e_d(r,al) /USA.primary -0.4, USA.secondary -0.4, EU.primary -0.4, EU.secondary -0.4, OECD.primary -0.4, OECD.secondary -0.4, N_OECD.primary -0.4, N_OECD.secondary -0.4/;
 
 *currently based off of Pd = a + b*Qd, Ps = c + d*Qs, where a,b,c,d are parameters
@@ -31,30 +31,48 @@ a(r,al) = pbar(r,al) - b(r,al) * qbar_d(r,al);
 d(r,al) = pbar(r,al) / (e_s(r,al) * qbar_s(r,al));
 c(r,al) = pbar(r,al) - d(r,al) * qbar_s(r,al);
 
-*t will essentially be the cost of transportation/logistics?
-parameter t(al) ;
-*!!! here you'll want to make sure that the prices for primary in ROW > USA, and vice versa for secondary!!!!
-t("primary") = pbar('ROW',"primary") - pbar('USA',"primary");
-t("secondary") = pbar('USA',"secondary") - pbar('ROW',"secondary");
 
+*t will essentially be the cost of transportation/logistics?
+parameter t(r,al);
+*!!! here you'll want to make sure that the prices for primary in ROW > USA, and vice versa for secondary!!!!
+*transport of primary from OECD to USA
+t("OECD", "primary") = pbar("USA", "primary") - pbar("OECD", "primary");
+*transport of primary from non-oecd to EU 
+t("N_OECD", "primary") = pbar("EU", "primary") - pbar("N_OECD", "primary");
+*transport of secondary from US to non OECD 
+t("USA", "secondary") = pbar("N_OECD", "secondary") - pbar("USA", "secondary");
+*transport of secondary from EU to non-OECD 
+t("EU", "secondary") = pbar("N_OECD", "secondary") - pbar("EU", "secondary");
+*transport of secondary from OECD to non-OECD 
+t("OECD", "secondary") = pbar("N_OECD", "secondary") - pbar("OECD", "secondary");
 
 *varibales - will have to have more specefic to primary and secondary
 positive variable Qd(r,al), Qs(r,al);
-positive variable X(al) "exports"; 
+**!!!!needs to be for region too!!!!
+positive variable X(r,al) "exports"; 
 variable W "total welfare";
 
-*will have to have market clearing for different countries and primary/secondary once added 
-*also will have to add different constrains ie EU restiricitions on secondary exports once 2027....
-equation objfn, market_clearing_USA, market_clearing_ROW;
+*market clearing conditions 
+equation objfn, market_clearing_USA, market_clearing_EU, market_clearing_OECD, market_clearing_N_OECD, balance_primary, balance_secondary;
 
 
 objfn.. W =e=  
    sum((r,al), a(r,al) * Qd(r,al) + b(r,al) * Qd(r,al) *Qd(r,al) /2 
    - c(r,al) * Qs(r,al) - d(r,al) *Qs(r,al) * Qs(r,al) / 2 ) 
-   - sum(al, t(al) * X(al));
+   - sum((r,al), t(r,al) * X(r,al));
+** market clearning for each region: OECD exports primary to US, Non-OECD exports primary to EU, US EU and OECD export secondary to non-oecd 
+*US imports primary, export secondary 
+market_clearing_USA(al).. Qd('USA',al) + X('USA',al)$sameas(al,"secondary") =e= Qs('USA',al) + X('USA',al)$sameas(al,"primary");
+**EU imports primary, exports secondary 
+market_clearing_EU(al).. Qd('EU',al) + X('EU',al)$sameas(al,"secondary") =e= Qs('EU',al) + X('EU',al)$sameas(al,"primary");
+*OECD exports primary and secondary
+market_clearing_OECD(al).. Qd('OECD',al) + X('OECD',al) =e= Qs('OECD',al);
+*non oecd exports primary and imports secondary 
+market_clearing_N_OECD(al).. Qd('N_OECD',al) + X('N_OECD',al)$sameas(al,"primary") =e= Qs('N_OECD',al) + X('N_OECD',al)$sameas(al,"secondary");
+*balance trade? 
+balance_primary.. sum(r, X(r,"primary")) =e= sum(r, X(r,"primary"));
+balance_secondary.. sum(r, X(r,"secondary")) =e= sum(r, X(r,"secondary"));
 
-market_clearing_USA(al).. Qd('USA',al) + X(al)$sameas(al,"primary") =e= Qs('USA',al) + X(al)$sameas(al,"secondary");
-market_clearing_ROW(al).. Qd('ROW',al) + X(al)$sameas(al,"secondary") =e= Qs('ROW',al) + X(al)$sameas(al,"primary");
 
 model simple /all/; 
 
@@ -62,10 +80,13 @@ solve simple using QCP maximizing W;
 
 $exit
 parameter rep ; 
+ 
 rep ("BAU", "Qd",r) = Qd.l(r);
 rep("BAU", "Qs",r) = Qs.l(r);
 rep("BAU", "P", "USA") = market_clearing_USA.m;
-rep("BAU", "P", "ROW") = market_clearing_ROW.m;
+rep("BAU", "P", "EU") = market_clearing_EU.m;
+rep("BAU", "P", "OECD") = market_clearing_OECD.m;
+rep("BAU", "P", "N_OECD") = market_clearing_N_OECD.m;
 
 execute_unload "simple.gdx" ;
 
