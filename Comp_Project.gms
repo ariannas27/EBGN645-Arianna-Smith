@@ -1,36 +1,34 @@
-*Trying out simplest model for project 
-*current sets: regions (US and RoW), aluminum type (primary or secondary)
-*will have to complicate regions sets to add more countries 
-*will have to add time dimension, will also be a new set?
-*****NEXT STEPS: FIND ACCURATE DATA, ADD CANADA, ADD A SHOCK******
 
-set r /USA, ROW/;
+*current sets: regions (US, EU, OECD (-EU countries in OECD and US), Non-OECD(essentially row now?)), aluminum type (primary or secondary)
+**may further complicate the regions set, Certainly add canada next (next situation is US Tariffs)
+*will have to add time dimension, this is another set? 
+*****NEXT STEPS: FIND ACCURATE DATA, EU EXPORT BAN, ADD CANADA, US TARIFFS******
+
+set r /USA, EU, OECD, N_OECD/;
 set al /primary, secondary/;
 
 *parameters = essentially cost curves, FIND BETTER NUMBERS - currently using rough estimated numbers from AI 
 *prices USD/metric ton , qty = metric tons , currently total aluminum (primary + secondary) 
 parameter 
 ****NUMBERS ARE PRETTY RANDOM NEED TO SEARCH FOR BETTER DATA
-*price of aluminum USA and ROW 
-pbar(r,al) /USA.primary 2855, USA.secondary 100, ROW.primary 100, ROW.secondary 2420/,
+*!!!!!!!!!!!!!!!!price of aluminum- Prices for Importers need to be higher than the exporters!!!!!!!!!!!!!!!! 
+pbar(r,al) /USA.primary 2855, USA.secondary 100, EU.primary 100, EU.secondary 2420, OECD.primary 100, OECD.secondary 2420, N_OECD.primary 100, N_OECD.secondary 2420/,
 *qty supplied aluminum USA and ROW 
-qbar_s(r,al) /USA.primary 2236000, USA.secondary 100, ROW.primary 96000000, ROW.secondary 100/,
+qbar_s(r,al) /USA.primary 2236000, USA.secondary 100, EU.primary 96000000, EU.secondary 100, OECD.primary 96000000, OECD.secondary 100, N_OECD.primary 96000000, N_OECD.secondary 100/,
 *qty demanded aluminum USA and ROW
-qbar_d(r,al) /USA.primary 5830000, USA.secondary 100, ROW.primary 92406000, ROW.secondary 100/,
-**should break out elasticities more 
-*elasticity of supply generally 
-e_s /0.4/
-*elasticity of demand generally 
-e_d /-0.4/;
+qbar_d(r,al) /USA.primary 5830000, USA.secondary 100, EU.primary 92406000, EU.secondary 100, OECD.primary 100, OECD.secondary 100, N_OECD.primary 100, N_OECD.secondary 100/,
+**!!!!!if issue w elasticity go back to generally for now - not broken out to primary and secondary/regions  
+*elasticity of supply
+e_s(r,al) /USA.primary 0.4, USA.secondary 0.4, EU.primary 0.4, EU.secondary 0.4, OECD.primary 0.4, OECD.secondary 0.4, N_OECD.primary 0.4, N_OECD.secondary 0.4/;
+*elasticity of demand for primary & secondary 
+e_d(r,al) /USA.primary -0.4, USA.secondary -0.4, EU.primary -0.4, EU.secondary -0.4, OECD.primary -0.4, OECD.secondary -0.4, N_OECD.primary -0.4, N_OECD.secondary -0.4/;
 
 *currently based off of Pd = a + b*Qd, Ps = c + d*Qs, where a,b,c,d are parameters
-* elasticities for each country/for primary and secondary 
 parameter a(r,al),b(r,al),c(r,al),d(r,al); 
 
-*is this right?
-b(r,al) = pbar(r,al) / (e_d * qbar_d(r,al));
+b(r,al) = pbar(r,al) / (e_d(r,al) * qbar_d(r,al));
 a(r,al) = pbar(r,al) - b(r,al) * qbar_d(r,al);
-d(r,al) = pbar(r,al) / (e_s * qbar_s(r,al));
+d(r,al) = pbar(r,al) / (e_s(r,al) * qbar_s(r,al));
 c(r,al) = pbar(r,al) - d(r,al) * qbar_s(r,al);
 
 *t will essentially be the cost of transportation/logistics?
