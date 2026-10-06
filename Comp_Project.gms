@@ -53,7 +53,7 @@ positive variable X(r,al) "exports";
 variable W "total welfare";
 
 *market clearing conditions 
-equation objfn, market_clearing_USA, market_clearing_EU, market_clearing_OECD, market_clearing_N_OECD, balance_primary, balance_secondary;
+equation objfn, market_clearing_USA, market_clearing_EU, market_clearing_OECD, market_clearing_N_OECD;
 
 
 objfn.. W =e=  
@@ -69,24 +69,23 @@ market_clearing_EU(al).. Qd('EU',al) + X('EU',al)$sameas(al,"secondary") =e= Qs(
 market_clearing_OECD(al).. Qd('OECD',al) + X('OECD',al) =e= Qs('OECD',al);
 *non oecd exports primary and imports secondary 
 market_clearing_N_OECD(al).. Qd('N_OECD',al) + X('N_OECD',al)$sameas(al,"primary") =e= Qs('N_OECD',al) + X('N_OECD',al)$sameas(al,"secondary");
-*balance trade? 
-balance_primary.. sum(r, X(r,"primary")) =e= sum(r, X(r,"primary"));
-balance_secondary.. sum(r, X(r,"secondary")) =e= sum(r, X(r,"secondary"));
+
 
 
 model simple /all/; 
 
 solve simple using QCP maximizing W;
 
-$exit
-parameter rep ; 
- 
-rep ("BAU", "Qd",r) = Qd.l(r);
-rep("BAU", "Qs",r) = Qs.l(r);
-rep("BAU", "P", "USA") = market_clearing_USA.m;
-rep("BAU", "P", "EU") = market_clearing_EU.m;
-rep("BAU", "P", "OECD") = market_clearing_OECD.m;
-rep("BAU", "P", "N_OECD") = market_clearing_N_OECD.m;
+*$exit
+
+parameter rep;
+
+rep("BAU", "Qd", r, al) = Qd.l(r,al);
+rep("BAU", "Qs", r, al) = Qs.l(r,al);
+rep("BAU", "P", "USA", al) = market_clearing_USA.m(al);
+rep("BAU", "P", "EU", al) = market_clearing_EU.m(al);
+rep("BAU", "P", "OECD", al) = market_clearing_OECD.m(al);
+rep("BAU", "P", "N_OECD", al) = market_clearing_N_OECD.m(al);
 
 execute_unload "simple.gdx" ;
 

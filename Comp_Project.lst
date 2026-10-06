@@ -1,4 +1,4 @@
-GAMS 54.3.1  61154be4 Aug 21, 2026          WEX-WEI x86 64bit/MS Windows - 10/06/26 12:09:51 Page 1
+GAMS 54.3.1  61154be4 Aug 21, 2026          WEX-WEI x86 64bit/MS Windows - 10/06/26 12:18:06 Page 1
 G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
 C o m p i l a t i o n
 
@@ -58,8 +58,8 @@ C o m p i l a t i o n
   53  variable W "total welfare";
   54   
   55  *market clearing conditions
-  56  equation objfn, market_clearing_USA, market_clearing_EU, market_clearing_OECD, market_clearing_N_OECD, balance_primary, balance_secondary;
-  57   
+  56  equation objfn, market_clearing_USA, market_clearing_EU, market_clearing_OECD, market_clearing_N_OECD;
+  57  *, balance_primary, balance_secondary
   58   
   59  objfn.. W =e=
   60     sum((r,al), a(r,al) * Qd(r,al) + b(r,al) * Qd(r,al) *Qd(r,al) /2
@@ -75,28 +75,32 @@ C o m p i l a t i o n
   70  *non oecd exports primary and imports secondary
   71  market_clearing_N_OECD(al).. Qd('N_OECD',al) + X('N_OECD',al)$sameas(al,"primary") =e= Qs('N_OECD',al) + X('N_OECD',al)$sameas(al,"secondary");
   72  *balance trade?
-  73  balance_primary.. sum(r, X(r,"primary")) =e= sum(r, X(r,"primary"));
-  74  balance_secondary.. sum(r, X(r,"secondary")) =e= sum(r, X(r,"secondary"));
+  73  *balance_primary.. sum(r, X(r,"primary")) =e= sum(r, X(r,"primary"));
+  74  *balance_secondary.. sum(r, X(r,"secondary")) =e= sum(r, X(r,"secondary"));
   75   
   76   
   77  model simple /all/;
   78   
   79  solve simple using QCP maximizing W;
   80   
-EXIT C:\Users\alsmi\OneDrive\Documents\GitHub\EBGN645 Arianna Smith\Comp_Project.gms
-GAMS 54.3.1  61154be4 Aug 21, 2026          WEX-WEI x86 64bit/MS Windows - 10/06/26 12:09:51 Page 2
-G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
-Include File Summary
-
-
-   SEQ   GLOBAL TYPE      PARENT   LOCAL  INCLVL  FILENAME
-
-     1        1 INPUT          0       0       0  C:\Users\alsmi\OneDrive\Documents\GitHub\EBGN645 Arianna Smith\Comp_Project.gms
-     2       81 EXIT           1      81       0  C:\Users\alsmi\OneDrive\Documents\GitHub\EBGN645 Arianna Smith\Comp_Project.gms
+  81  *$exit
+  82   
+  83  parameter rep;
+  84   
+  85  rep("BAU", "Qd", r, al) = Qd.l(r,al);
+  86  rep("BAU", "Qs", r, al) = Qs.l(r,al);
+  87  rep("BAU", "P", "USA", al) = market_clearing_USA.m(al);
+  88  rep("BAU", "P", "EU", al) = market_clearing_EU.m(al);
+  89  rep("BAU", "P", "OECD", al) = market_clearing_OECD.m(al);
+  90  rep("BAU", "P", "N_OECD", al) = market_clearing_N_OECD.m(al);
+  91   
+  92  execute_unload "simple.gdx" ;
+  93   
+  94   
 
 
 COMPILATION TIME     =        0.000 SECONDS      3 MB  54.3.1 61154be4 WEX-WEI
-GAMS 54.3.1  61154be4 Aug 21, 2026          WEX-WEI x86 64bit/MS Windows - 10/06/26 12:09:51 Page 3
+GAMS 54.3.1  61154be4 Aug 21, 2026          WEX-WEI x86 64bit/MS Windows - 10/06/26 12:18:06 Page 2
 G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
 Equation Listing    SOLVE simple Using QCP From line 79
 
@@ -133,17 +137,7 @@ market_clearing_N_OECD(primary)..  Qd(N_OECD,primary) - Qs(N_OECD,primary) + X(N
      
 market_clearing_N_OECD(secondary)..  Qd(N_OECD,secondary) - Qs(N_OECD,secondary) - X(N_OECD,secondary) =E= 0 ; (LHS = 0)
      
-
----- balance_primary  =E=  
-
-                NONE
-
-
----- balance_secondary  =E=  
-
-                NONE
-
-GAMS 54.3.1  61154be4 Aug 21, 2026          WEX-WEI x86 64bit/MS Windows - 10/06/26 12:09:51 Page 4
+GAMS 54.3.1  61154be4 Aug 21, 2026          WEX-WEI x86 64bit/MS Windows - 10/06/26 12:18:06 Page 3
 G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
 Column Listing      SOLVE simple Using QCP From line 79
 
@@ -209,7 +203,7 @@ W
                 (.LO, .L, .UP, .M = -INF, 0, +INF, 0)
         1       objfn
 
-GAMS 54.3.1  61154be4 Aug 21, 2026          WEX-WEI x86 64bit/MS Windows - 10/06/26 12:09:51 Page 5
+GAMS 54.3.1  61154be4 Aug 21, 2026          WEX-WEI x86 64bit/MS Windows - 10/06/26 12:18:06 Page 4
 G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
 Range Statistics    SOLVE simple Using QCP From line 79
 
@@ -220,21 +214,21 @@ RHS       [min, max] : [        NA,        NA] - Zero values observed as well
 Bound     [min, max] : [        NA,        NA] - Zero values observed as well
 Matrix    [min, max] : [ 1.000E+00, 1.925E+04]
 
-GAMS 54.3.1  61154be4 Aug 21, 2026          WEX-WEI x86 64bit/MS Windows - 10/06/26 12:09:51 Page 6
+GAMS 54.3.1  61154be4 Aug 21, 2026          WEX-WEI x86 64bit/MS Windows - 10/06/26 12:18:06 Page 5
 G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
 Model Statistics    SOLVE simple Using QCP From line 79
 
 
 MODEL STATISTICS
 
-BLOCKS OF EQUATIONS           7     SINGLE EQUATIONS            9
+BLOCKS OF EQUATIONS           5     SINGLE EQUATIONS            9
 BLOCKS OF VARIABLES           4     SINGLE VARIABLES           25
 NON ZERO ELEMENTS            46     NON LINEAR N-Z             16
 CODE LENGTH                 114     CONSTANT POOL              46
 
 
-GENERATION TIME      =        0.016 SECONDS      4 MB  54.3.1 61154be4 WEX-WEI
-GAMS 54.3.1  61154be4 Aug 21, 2026          WEX-WEI x86 64bit/MS Windows - 10/06/26 12:09:51 Page 7
+GENERATION TIME      =        0.000 SECONDS      4 MB  54.3.1 61154be4 WEX-WEI
+GAMS 54.3.1  61154be4 Aug 21, 2026          WEX-WEI x86 64bit/MS Windows - 10/06/26 12:18:06 Page 6
 G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
 Solution Report     SOLVE simple Using QCP From line 79
 
@@ -249,7 +243,7 @@ Solution Report     SOLVE simple Using QCP From line 79
 **** MODEL STATUS      2 Locally Optimal
 **** OBJECTIVE VALUE     920934109546.0845
 
- RESOURCE USAGE, LIMIT          0.032 10000000000.000
+ RESOURCE USAGE, LIMIT          0.031 10000000000.000
  ITERATION COUNT, LIMIT         5    2147483647
  EVALUATION ERRORS              0             0
  
@@ -275,10 +269,10 @@ Solution Report     SOLVE simple Using QCP From line 79
  ** Optimal solution. Reduced gradient less than tolerance.
  
  
- CONOPT time Total                            0.004 seconds
+ CONOPT time Total                            0.006 seconds
    of which: Function evaluations             0.000 =  0.0%
-             1st Derivative evaluations       0.001 = 25.0%
-             2nd Derivative evaluations       0.001 = 25.0%
+             1st Derivative evaluations       0.000 =  0.0%
+             2nd Derivative evaluations       0.001 = 16.7%
              Directional 2nd Deriv(Hess)      0.000 =  0.0%
              Interval derivative evals        0.000 =  0.0%
  
@@ -314,11 +308,6 @@ secondary          .              .              .          2467.3469
 
 primary            .              .              .          2853.4519      
 secondary          .              .              .             EPS         
-
-                NONE
-
----- EQU balance_primary                  (EMPTY)
----- EQU balance_secondary                  (EMPTY)
 
 ---- VAR Qd  
 
@@ -370,9 +359,12 @@ N_OECD.secondary          .       1.4720000E+7        +INF             .
                              0 INFEASIBLE
                              0  UNBOUNDED
                              0     ERRORS
+GAMS 54.3.1  61154be4 Aug 21, 2026          WEX-WEI x86 64bit/MS Windows - 10/06/26 12:18:06 Page 7
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+E x e c u t i o n
 
 
-EXECUTION TIME       =        0.109 SECONDS      4 MB  54.3.1 61154be4 WEX-WEI
+EXECUTION TIME       =        0.110 SECONDS      4 MB  54.3.1 61154be4 WEX-WEI
 
 
 USER: Course License                                 G260809+0003Ac-GEN
