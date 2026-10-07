@@ -7,17 +7,17 @@
 set r /USA, EU, OECD, N_OECD/;
 set al /primary, secondary/;
 
-*parameters = essentially cost curves, FIND BETTER NUMBERS - currently using rough estimated numbers from AI 
+*parameters = essentially cost curves, !!!!!!!!FIND BETTER NUMBERS!!!!! - currently using rough estimated numbers from AI 
 *prices USD/metric ton , qty = metric tons , currently total aluminum (primary + secondary) 
 parameter 
 ****NUMBERS ARE PRETTY RANDOM NEED TO SEARCH FOR BETTER DATA**************
-*!!!!!!!!!!!!!!!!price of aluminum- Prices for Importers need to be higher than the exporters!!!!!!!!!!!!!!!! 
+*!!!!!!!!!!!!!!!!Prices for Importers need to be higher than the respective exporters!!!!!!!!!!!!!!!! 
 pbar(r,al) /USA.primary 5500, USA.secondary 3100, EU.primary 3700, EU.secondary 3300, OECD.primary 3550, OECD.secondary 3100, N_OECD.primary 3150, N_OECD.secondary 3500/,
 *qty supplied aluminum USA and ROW 
 qbar_s(r,al) /USA.primary 700000, USA.secondary 5000000, EU.primary 3000000, EU.secondary 6900000, OECD.primary 7300000, OECD.secondary 5300000, N_OECD.primary 62000000, N_OECD.secondary 12800000/,
 *qty demanded aluminum USA and ROW
 qbar_d(r,al) /USA.primary 3500000, USA.secondary 3300000, EU.primary 7500000, EU.secondary 6200000, OECD.primary 4500000, OECD.secondary 4500000, N_OECD.primary 57500000, N_OECD.secondary 16000000/,
-**!!!!!if issue w elasticity go back to generally for now - not broken out to primary and secondary/regions  
+**!!!!!change for at least primary and secondary for now!!!!
 *elasticity of supply
 e_s(r,al) /USA.primary 0.4, USA.secondary 0.4, EU.primary 0.4, EU.secondary 0.4, OECD.primary 0.4, OECD.secondary 0.4, N_OECD.primary 0.4, N_OECD.secondary 0.4/,
 *elasticity of demand 
@@ -32,9 +32,8 @@ d(r,al) = pbar(r,al) / (e_s(r,al) * qbar_s(r,al));
 c(r,al) = pbar(r,al) - d(r,al) * qbar_s(r,al);
 
 
-*t will essentially be the cost of transportation/logistics?
+*t will essentially be the cost of transportation
 parameter t(r,al);
-*!!! here you'll want to make sure that the prices for primary in ROW > USA, and vice versa for secondary!!!!
 *transport of primary from OECD to USA
 t("OECD", "primary") = pbar("USA", "primary") - pbar("OECD", "primary");
 *transport of primary from non-oecd to EU 
