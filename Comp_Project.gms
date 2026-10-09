@@ -31,45 +31,55 @@ a(r,al) = pbar(r,al) - b(r,al) * qbar_d(r,al);
 d(r,al) = pbar(r,al) / (e_s(r,al) * qbar_s(r,al));
 c(r,al) = pbar(r,al) - d(r,al) * qbar_s(r,al);
 
-
+alias(r,rr); 
 *t will essentially be the cost of transportation
-parameter t(r,al);
+parameter t(r,rr,al);
 *transport of primary from OECD to USA
-t("OECD", "primary") = pbar("USA", "primary") - pbar("OECD", "primary");
+*t("OECD", "primary") = pbar("USA", "primary") - pbar("OECD", "primary");
 *transport of primary from non-oecd to EU 
-t("N_OECD", "primary") = pbar("EU", "primary") - pbar("N_OECD", "primary");
+*t("N_OECD", "primary") = pbar("EU", "primary") - pbar("N_OECD", "primary");
 *transport of secondary from US to non OECD 
-t("USA", "secondary") = pbar("N_OECD", "secondary") - pbar("USA", "secondary");
+*t("USA", "secondary") = pbar("N_OECD", "secondary") - pbar("USA", "secondary");
 *transport of secondary from EU to non-OECD 
-t("EU", "secondary") = pbar("N_OECD", "secondary") - pbar("EU", "secondary");
+*t("EU", "secondary") = pbar("N_OECD", "secondary") - pbar("EU", "secondary");
 *transport of secondary from OECD to non-OECD 
-t("OECD", "secondary") = pbar("N_OECD", "secondary") - pbar("OECD", "secondary");
+*t("OECD", "secondary") = pbar("N_OECD", "secondary") - pbar("OECD", "secondary");
+
+t(r,rr,al) = abs(pbar(rr,al) - pbar(r,al)) ; 
 
 *varibales - will have to have more specefic to primary and secondary
 positive variable Qd(r,al), Qs(r,al);
 **!!!!needs to be for region too!!!!
-positive variable X(r,al) "exports"; 
+* variable X(r,al) "exports"; 
 variable W "total welfare";
 
 *market clearing conditions 
-equation objfn, market_clearing_USA, market_clearing_EU, market_clearing_OECD, market_clearing_N_OECD;
+equation objfn; 
+*, market_clearing_USA, market_clearing_EU, market_clearing_OECD, market_clearing_N_OECD;
+
+
+** market clearning for each region: OECD exports primary to US, Non-OECD exports primary to EU, US EU and OECD export secondary to non-oecd 
+*US imports primary, export secondary 
+*market_clearing_USA(al).. Qd('USA',al) + X('USA',al)$sameas(al,"secondary") =e= Qs('USA',al) + X('USA',al)$sameas(al,"primary");
+**EU imports primary, exports secondary 
+*market_clearing_EU(al).. Qd('EU',al) + X('EU',al)$sameas(al,"secondary") =e= Qs('EU',al) + X('EU',al)$sameas(al,"primary");
+*OECD exports primary and secondary
+*market_clearing_OECD(al).. Qd('OECD',al) + X('OECD',al) =e= Qs('OECD',al);
+*non oecd exports primary and imports secondary 
+*market_clearing_N_OECD(al).. Qd('N_OECD',al) + X('N_OECD',al)$sameas(al,"primary") =e= Qs('N_OECD',al) + X('N_OECD',al)$sameas(al,"secondary");
+
+
+alias(r,rr) ; 
+positive variable ship(r,rr,al) ; 
 
 
 objfn.. W =e=  
    sum((r,al), a(r,al) * Qd(r,al) + b(r,al) * Qd(r,al) *Qd(r,al) /2 
    - c(r,al) * Qs(r,al) - d(r,al) *Qs(r,al) * Qs(r,al) / 2 ) 
-   - sum((r,al), t(r,al) * X(r,al));
-** market clearning for each region: OECD exports primary to US, Non-OECD exports primary to EU, US EU and OECD export secondary to non-oecd 
-*US imports primary, export secondary 
-market_clearing_USA(al).. Qd('USA',al) + X('USA',al)$sameas(al,"secondary") =e= Qs('USA',al) + X('USA',al)$sameas(al,"primary");
-**EU imports primary, exports secondary 
-market_clearing_EU(al).. Qd('EU',al) + X('EU',al)$sameas(al,"secondary") =e= Qs('EU',al) + X('EU',al)$sameas(al,"primary");
-*OECD exports primary and secondary
-market_clearing_OECD(al).. Qd('OECD',al) + X('OECD',al) =e= Qs('OECD',al);
-*non oecd exports primary and imports secondary 
-market_clearing_N_OECD(al).. Qd('N_OECD',al) + X('N_OECD',al)$sameas(al,"primary") =e= Qs('N_OECD',al) + X('N_OECD',al)$sameas(al,"secondary");
+   - sum((r,rr,al), t(r,rr,al) * ship(r,rr,al));
 
-
+equation market_clearing_r(r,al) ; 
+market_clearing_r(r,al)..  Qd(r,al) + sum(rr$(not sameas(r,rr)), ship(r,rr,al)) =e= Qs(r,al) + sum(rr$(not sameas(r,rr)), ship(rr,r,al));
 
 model simple /all/; 
 
@@ -81,10 +91,7 @@ parameter rep;
 
 rep("BAU", "Qd", r, al) = Qd.l(r,al);
 rep("BAU", "Qs", r, al) = Qs.l(r,al);
-rep("BAU", "P", "USA", al) = market_clearing_USA.m(al);
-rep("BAU", "P", "EU", al) = market_clearing_EU.m(al);
-rep("BAU", "P", "OECD", al) = market_clearing_OECD.m(al);
-rep("BAU", "P", "N_OECD", al) = market_clearing_N_OECD.m(al);
+rep("BAU", "P", r, al) = market_clearing_r.m(r,al);
 
 execute_unload "simple.gdx" ;
 
