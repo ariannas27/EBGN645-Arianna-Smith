@@ -1,117 +1,97 @@
-GAMS 54.3.1  61154be4 Aug 21, 2026          WEX-WEI x86 64bit/MS Windows - 10/09/26 10:55:54 Page 1
+GAMS 54.3.1  61154be4 Aug 21, 2026          WEX-WEI x86 64bit/MS Windows - 10/09/26 11:25:05 Page 1
 G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
 C o m p i l a t i o n
 
 
-   1   
+   1  *!!!!!!!!!EU EXPORT BAN!!!!!!
    2  *current sets: regions (US, EU, OECD (-EU countries in OECD and US), Non-OECD(essentially row now?)), aluminum type (primary or secondary)
    3  **may further complicate the regions set, Certainly add canada next (next situation is US Tariffs)
    4  *will have to add time dimension, this is another set?
-   5  *****NEXT STEPS: FIND ACCURATE DATA, EU EXPORT BAN, ADD CANADA, US TARIFFS******
+   5  *****NEXT STEPS: FIND more ACCURATE DATA, ADD CANADA, US TARIFFS******
    6   
    7  set r /USA, EU, OECD, N_OECD/;
    8  set al /primary, secondary/;
    9   
   10  *parameters = essentially cost curves, !!!!!!!!FIND BETTER NUMBERS!!!!! - currently using rough estimated numbers from AI
-  11  *prices USD/metric ton , qty = metric tons , currently total aluminum (primary + secondary)
+  11  *prices USD/metric ton , qty = metric tons
   12  parameter
-  13  ****NUMBERS ARE PRETTY RANDOM NEED TO SEARCH FOR BETTER DATA**************
-  14  *!!!!!!!!!!!!!!!!Prices for Importers need to be higher than the respective exporters!!!!!!!!!!!!!!!!
-  15  pbar(r,al) /USA.primary 5500, USA.secondary 3100, EU.primary 3700, EU.secondary 3300, OECD.primary 3550, OECD.secondary 3100, N_OECD.primary 3150, N_OECD.secondary 3500/,
-  16  *qty supplied aluminum USA and ROW
-  17  qbar_s(r,al) /USA.primary 700000, USA.secondary 5000000, EU.primary 3000000, EU.secondary 6900000, OECD.primary 7300000, OECD.secondary 5300000, N_OECD.primary 62000000, N_OECD.secondary 12800000/,
-  18  *qty demanded aluminum USA and ROW
-  19  qbar_d(r,al) /USA.primary 3500000, USA.secondary 3300000, EU.primary 7500000, EU.secondary 6200000, OECD.primary 4500000, OECD.secondary 4500000, N_OECD.primary 57500000, N_OECD.secondary 16000000/,
-  20  **!!!!!change for at least primary and secondary for now!!!!
-  21  *elasticity of supply
-  22  e_s(r,al) /USA.primary 0.4, USA.secondary 0.2, EU.primary 0.4, EU.secondary 0.2, OECD.primary 0.2, OECD.secondary 0.2, N_OECD.primary 0.2, N_OECD.secondary 0.2/,
-  23  *elasticity of demand
-  24  e_d(r,al) /USA.primary -0.2, USA.secondary -0.5, EU.primary -0.2, EU.secondary -0.5, OECD.primary -0.2, OECD.secondary -0.5, N_OECD.primary -0.2, N_OECD.secondary -0.5/;
-  25   
-  26  *currently based off of Pd = a + b*Qd, Ps = c + d*Qs, where a,b,c,d are parameters
-  27  parameter a(r,al),b(r,al),c(r,al),d(r,al);
-  28   
-  29  b(r,al) = pbar(r,al) / (e_d(r,al) * qbar_d(r,al));
-  30  a(r,al) = pbar(r,al) - b(r,al) * qbar_d(r,al);
-  31  d(r,al) = pbar(r,al) / (e_s(r,al) * qbar_s(r,al));
-  32  c(r,al) = pbar(r,al) - d(r,al) * qbar_s(r,al);
-  33   
-  34  alias(r,rr);
-  35  *t will essentially be the cost of transportation
-  36  parameter t(r,rr,al);
-  37  *transport of primary from OECD to USA
-  38  *t("OECD", "primary") = pbar("USA", "primary") - pbar("OECD", "primary");
-  39  *transport of primary from non-oecd to EU
-  40  *t("N_OECD", "primary") = pbar("EU", "primary") - pbar("N_OECD", "primary");
-  41  *transport of secondary from US to non OECD
-  42  *t("USA", "secondary") = pbar("N_OECD", "secondary") - pbar("USA", "secondary");
-  43  *transport of secondary from EU to non-OECD
-  44  *t("EU", "secondary") = pbar("N_OECD", "secondary") - pbar("EU", "secondary");
-  45  *transport of secondary from OECD to non-OECD
-  46  *t("OECD", "secondary") = pbar("N_OECD", "secondary") - pbar("OECD", "secondary");
-  47   
-  48  t(r,rr,al) = abs(pbar(rr,al) - pbar(r,al)) ;
+  13  *!!!!!!!!!!!!!!!!Prices for Importers need to be higher than the respective exporters!!!!!!!!!!!!!!!!
+  14  pbar(r,al) /USA.primary 5500, USA.secondary 3100, EU.primary 3700, EU.secondary 3300, OECD.primary 3550, OECD.secondary 3100, N_OECD.primary 3150, N_OECD.secondary 3500/,
+  15  *qty supplied aluminum USA and ROW
+  16  qbar_s(r,al) /USA.primary 700000, USA.secondary 5000000, EU.primary 3000000, EU.secondary 6900000, OECD.primary 7300000, OECD.secondary 5300000, N_OECD.primary 62000000, N_OECD.secondary 12800000/,
+  17  *qty demanded aluminum USA and ROW
+  18  qbar_d(r,al) /USA.primary 3500000, USA.secondary 3300000, EU.primary 7500000, EU.secondary 6200000, OECD.primary 4500000, OECD.secondary 4500000, N_OECD.primary 57500000, N_OECD.secondary 16000000/,
+  19  **!!!!!change for at least primary and secondary for now!!!!
+  20  *elasticity of supply
+  21  e_s(r,al) /USA.primary 0.4, USA.secondary 0.2, EU.primary 0.4, EU.secondary 0.2, OECD.primary 0.4, OECD.secondary 0.2, N_OECD.primary 0.4, N_OECD.secondary 0.2/,
+  22  *elasticity of demand
+  23  e_d(r,al) /USA.primary -0.2, USA.secondary -0.5, EU.primary -0.2, EU.secondary -0.5, OECD.primary -0.2, OECD.secondary -0.5, N_OECD.primary -0.2, N_OECD.secondary -0.5/;
+  24   
+  25  *currently based off of Pd = a + b*Qd, Ps = c + d*Qs, where a,b,c,d are parameters
+  26  parameter a(r,al),b(r,al),c(r,al),d(r,al);
+  27   
+  28  b(r,al) = pbar(r,al) / (e_d(r,al) * qbar_d(r,al));
+  29  a(r,al) = pbar(r,al) - b(r,al) * qbar_d(r,al);
+  30  d(r,al) = pbar(r,al) / (e_s(r,al) * qbar_s(r,al));
+  31  c(r,al) = pbar(r,al) - d(r,al) * qbar_s(r,al);
+  32   
+  33  alias(r,rr);
+  34  *t will essentially be the cost of transportation
+  35  parameter t(r,rr,al);
+  36   
+  37   
+  38  t(r,rr,al) = abs(pbar(rr,al) - pbar(r,al)) ;
+  39   
+  40   
+  41  positive variable Qd(r,al), Qs(r,al);
+  42   
+  43  * variable X(r,al) "exports";
+  44  variable W "total welfare";
+  45   
+  46  *market clearing conditions
+  47  equation objfn;
+  48   
   49   
-  50  *varibales - will have to have more specefic to primary and secondary
-  51  positive variable Qd(r,al), Qs(r,al);
-  52  **!!!!needs to be for region too!!!!
-  53  * variable X(r,al) "exports";
-  54  variable W "total welfare";
+  50   
+  51  alias(r,rr) ;
+  52  positive variable ship(r,rr,al) ;
+  53  *no exports of secondary aluminum from EU to non-OECD
+  54  ship.fx('EU', 'N_OECD', 'secondary') = 0;
   55   
-  56  *market clearing conditions
-  57  equation objfn;
-  58  *, market_clearing_USA, market_clearing_EU, market_clearing_OECD, market_clearing_N_OECD;
-  59   
+  56  objfn.. W =e=
+  57     sum((r,al), a(r,al) * Qd(r,al) + b(r,al) * Qd(r,al) *Qd(r,al) /2
+  58     - c(r,al) * Qs(r,al) - d(r,al) *Qs(r,al) * Qs(r,al) / 2 )
+  59     - sum((r,rr,al), t(r,rr,al) * ship(r,rr,al));
   60   
-  61  ** market clearning for each region: OECD exports primary to US, Non-OECD exports primary to EU, US EU and OECD export secondary to non-oecd
-  62  *US imports primary, export secondary
-  63  *market_clearing_USA(al).. Qd('USA',al) + X('USA',al)$sameas(al,"secondary") =e= Qs('USA',al) + X('USA',al)$sameas(al,"primary");
-  64  **EU imports primary, exports secondary
-  65  *market_clearing_EU(al).. Qd('EU',al) + X('EU',al)$sameas(al,"secondary") =e= Qs('EU',al) + X('EU',al)$sameas(al,"primary");
-  66  *OECD exports primary and secondary
-  67  *market_clearing_OECD(al).. Qd('OECD',al) + X('OECD',al) =e= Qs('OECD',al);
-  68  *non oecd exports primary and imports secondary
-  69  *market_clearing_N_OECD(al).. Qd('N_OECD',al) + X('N_OECD',al)$sameas(al,"primary") =e= Qs('N_OECD',al) + X('N_OECD',al)$sameas(al,"secondary");
-  70   
+  61  equation market_clearing_r(r,al) ;
+  62  market_clearing_r(r,al)..  Qd(r,al) + sum(rr$(not sameas(r,rr)), ship(r,rr,al)) =e= Qs(r,al) + sum(rr$(not sameas(r,rr)), ship(rr,r,al));
+  63   
+  64  model simple /all/;
+  65   
+  66  solve simple using QCP maximizing W;
+  67   
+  68  *$exit
+  69   
+  70  parameter rep;
   71   
-  72  alias(r,rr) ;
-  73  positive variable ship(r,rr,al) ;
-  74   
+  72  rep("EU secondary ban to non-oecd", "Qd", r, al) = Qd.l(r,al);
+  73  rep("EU secondary ban to non-oecd", "Qs", r, al) = Qs.l(r,al);
+  74  rep("EU secondary ban to non-oecd", "P", r, al) = market_clearing_r.m(r,al);
   75   
-  76  objfn.. W =e=
-  77     sum((r,al), a(r,al) * Qd(r,al) + b(r,al) * Qd(r,al) *Qd(r,al) /2
-  78     - c(r,al) * Qs(r,al) - d(r,al) *Qs(r,al) * Qs(r,al) / 2 )
-  79     - sum((r,rr,al), t(r,rr,al) * ship(r,rr,al));
-  80   
-  81  equation market_clearing_r(r,al) ;
-  82  market_clearing_r(r,al)..  Qd(r,al) + sum(rr$(not sameas(r,rr)), ship(r,rr,al)) =e= Qs(r,al) + sum(rr$(not sameas(r,rr)), ship(rr,r,al));
-  83   
-  84  model simple /all/;
-  85   
-  86  solve simple using QCP maximizing W;
-  87   
-  88  *$exit
-  89   
-  90  parameter rep;
-  91   
-  92  rep("BAU", "Qd", r, al) = Qd.l(r,al);
-  93  rep("BAU", "Qs", r, al) = Qs.l(r,al);
-  94  rep("BAU", "P", r, al) = market_clearing_r.m(r,al);
-  95   
-  96  execute_unload "simple.gdx" ;
-  97   
-  98   
+  76  execute_unload "eu_export_ban.gdx" ;
+  77   
+  78   
 
 
 COMPILATION TIME     =        0.000 SECONDS      3 MB  54.3.1 61154be4 WEX-WEI
-GAMS 54.3.1  61154be4 Aug 21, 2026          WEX-WEI x86 64bit/MS Windows - 10/09/26 10:55:54 Page 2
+GAMS 54.3.1  61154be4 Aug 21, 2026          WEX-WEI x86 64bit/MS Windows - 10/09/26 11:25:05 Page 2
 G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
-Equation Listing    SOLVE simple Using QCP From line 86
+Equation Listing    SOLVE simple Using QCP From line 66
 
 
 ---- objfn  =E=  
 
-objfn..  - (33000)*Qd(USA,primary) - (9300)*Qd(USA,secondary) - (22200)*Qd(EU,primary) - (9900)*Qd(EU,secondary) - (21300)*Qd(OECD,primary) - (9300)*Qd(OECD,secondary) - (18900)*Qd(N_OECD,primary) - (10500)*Qd(N_OECD,secondary) - (8250)*Qs(USA,primary) - (12400)*Qs(USA,secondary) - (5550)*Qs(EU,primary) - (13200)*Qs(EU,secondary) - (14200)*Qs(OECD,primary) - (12400)*Qs(OECD,secondary) - (12600)*Qs(N_OECD,primary) - (14000)*Qs(N_OECD,secondary) + W + 1800*ship(USA,EU,primary) + 200*ship(USA,EU,secondary) + 1950*ship(USA,OECD,primary) + 2350*ship(USA,N_OECD,primary) + 400*ship(USA,N_OECD,secondary) + 1800*ship(EU,USA,primary) + 200*ship(EU,USA,secondary) + 150*ship(EU,OECD,primary) + 200*ship(EU,OECD,secondary) + 550*ship(EU,N_OECD,primary) + 200*ship(EU,N_OECD,secondary) + 1950*ship(OECD,USA,primary) + 150*ship(OECD,EU,primary) + 200*ship(OECD,EU,secondary) + 400*ship(OECD,N_OECD,primary) + 400*ship(OECD,N_OECD,secondary) + 2350*ship(N_OECD,USA,primary) + 400*ship(N_OECD,USA,secondary) + 550*ship(N_OECD,EU,primary) + 200*ship(N_OECD,EU,secondary) + 400*ship(N_OECD,OECD,primary) + 400*ship(N_OECD,OECD,secondary) =E= 0 ; (LHS = 0)
+objfn..  - (33000)*Qd(USA,primary) - (9300)*Qd(USA,secondary) - (22200)*Qd(EU,primary) - (9900)*Qd(EU,secondary) - (21300)*Qd(OECD,primary) - (9300)*Qd(OECD,secondary) - (18900)*Qd(N_OECD,primary) - (10500)*Qd(N_OECD,secondary) - (8250)*Qs(USA,primary) - (12400)*Qs(USA,secondary) - (5550)*Qs(EU,primary) - (13200)*Qs(EU,secondary) - (5325)*Qs(OECD,primary) - (12400)*Qs(OECD,secondary) - (4725)*Qs(N_OECD,primary) - (14000)*Qs(N_OECD,secondary) + W + 1800*ship(USA,EU,primary) + 200*ship(USA,EU,secondary) + 1950*ship(USA,OECD,primary) + 2350*ship(USA,N_OECD,primary) + 400*ship(USA,N_OECD,secondary) + 1800*ship(EU,USA,primary) + 200*ship(EU,USA,secondary) + 150*ship(EU,OECD,primary) + 200*ship(EU,OECD,secondary) + 550*ship(EU,N_OECD,primary) + 200*ship(EU,N_OECD,secondary) + 1950*ship(OECD,USA,primary) + 150*ship(OECD,EU,primary) + 200*ship(OECD,EU,secondary) + 400*ship(OECD,N_OECD,primary) + 400*ship(OECD,N_OECD,secondary) + 2350*ship(N_OECD,USA,primary) + 400*ship(N_OECD,USA,secondary) + 550*ship(N_OECD,EU,primary) + 200*ship(N_OECD,EU,secondary) + 400*ship(N_OECD,OECD,primary) + 400*ship(N_OECD,OECD,secondary) =E= 0 ; (LHS = 0)
      
 
 ---- market_clearing_r  =E=  
@@ -124,9 +104,9 @@ market_clearing_r(EU,primary)..  Qd(EU,primary) - Qs(EU,primary) - ship(USA,EU,p
      
 REMAINING 5 ENTRIES SKIPPED
 
-GAMS 54.3.1  61154be4 Aug 21, 2026          WEX-WEI x86 64bit/MS Windows - 10/09/26 10:55:54 Page 3
+GAMS 54.3.1  61154be4 Aug 21, 2026          WEX-WEI x86 64bit/MS Windows - 10/09/26 11:25:05 Page 3
 G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
-Column Listing      SOLVE simple Using QCP From line 86
+Column Listing      SOLVE simple Using QCP From line 66
 
 
 ---- Qd  
@@ -195,9 +175,9 @@ ship(USA,OECD,primary)
        -1       market_clearing_r(OECD,primary)
 
 REMAINING 21 ENTRIES SKIPPED
-GAMS 54.3.1  61154be4 Aug 21, 2026          WEX-WEI x86 64bit/MS Windows - 10/09/26 10:55:54 Page 4
+GAMS 54.3.1  61154be4 Aug 21, 2026          WEX-WEI x86 64bit/MS Windows - 10/09/26 11:25:05 Page 4
 G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
-Range Statistics    SOLVE simple Using QCP From line 86
+Range Statistics    SOLVE simple Using QCP From line 66
 
 
 RANGE STATISTICS (ABSOLUTE NON-ZERO FINITE VALUES)
@@ -206,9 +186,9 @@ RHS       [min, max] : [        NA,        NA] - Zero values observed as well
 Bound     [min, max] : [        NA,        NA] - Zero values observed as well
 Matrix    [min, max] : [ 1.000E+00, 3.300E+04]
 
-GAMS 54.3.1  61154be4 Aug 21, 2026          WEX-WEI x86 64bit/MS Windows - 10/09/26 10:55:54 Page 5
+GAMS 54.3.1  61154be4 Aug 21, 2026          WEX-WEI x86 64bit/MS Windows - 10/09/26 11:25:05 Page 5
 G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
-Model Statistics    SOLVE simple Using QCP From line 86
+Model Statistics    SOLVE simple Using QCP From line 66
 
 
 MODEL STATISTICS
@@ -220,23 +200,23 @@ CODE LENGTH                 114     CONSTANT POOL              46
 
 
 GENERATION TIME      =        0.000 SECONDS      4 MB  54.3.1 61154be4 WEX-WEI
-GAMS 54.3.1  61154be4 Aug 21, 2026          WEX-WEI x86 64bit/MS Windows - 10/09/26 10:55:54 Page 6
+GAMS 54.3.1  61154be4 Aug 21, 2026          WEX-WEI x86 64bit/MS Windows - 10/09/26 11:25:05 Page 6
 G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
-Solution Report     SOLVE simple Using QCP From line 86
+Solution Report     SOLVE simple Using QCP From line 66
 
 
                S O L V E      S U M M A R Y
 
      MODEL   simple              OBJECTIVE  W
      TYPE    QCP                 DIRECTION  MAXIMIZE
-     SOLVER  CONOPT              FROM LINE  86
+     SOLVER  CONOPT              FROM LINE  66
 
 **** SOLVER STATUS     1 Normal Completion
 **** MODEL STATUS      2 Locally Optimal
-**** OBJECTIVE VALUE    1531365000000.0000
+**** OBJECTIVE VALUE    1254651442697.3655
 
  RESOURCE USAGE, LIMIT          0.047 10000000000.000
- ITERATION COUNT, LIMIT        11    2147483647
+ ITERATION COUNT, LIMIT        12    2147483647
  EVALUATION ERRORS              0             0
  
  
@@ -252,21 +232,22 @@ Solution Report     SOLVE simple Using QCP From line 86
     The Hessian of the Lagrangian has 16 elements on the diagonal,
     0 elements below the diagonal, and 16 nonlinear variables.
  
+    The pre-triangular part of the model has 0 constraints and 1 variables.
     The post-triangular part of the model has 1 constraints and variables.
     There are 8 penalty and minimax constraints with 16 variables.
  
-    Preprocessed model has 8 constraints and 40 variables
-    with 64 Jacobian elements, 0 of which are nonlinear.
+    Preprocessed model has 8 constraints and 39 variables
+    with 62 Jacobian elements, 0 of which are nonlinear.
  
  ** Optimal solution. Reduced gradient less than tolerance.
  
  
  CONOPT time Total                            0.014 seconds
-   of which: Function evaluations             0.002 = 14.3%
-             1st Derivative evaluations       0.001 =  7.1%
+   of which: Function evaluations             0.001 =  7.1%
+             1st Derivative evaluations       0.000 =  0.0%
              2nd Derivative evaluations       0.001 =  7.1%
-             Directional 2nd Deriv(Hess)      0.001 =  7.1%
-             Interval derivative evals        0.000 =  0.0%
+             Directional 2nd Deriv(Hess)      0.000 =  0.0%
+             Interval derivative evals        0.001 =  7.1%
  
 
                            LOWER          LEVEL          UPPER         MARGINAL
@@ -278,43 +259,43 @@ Solution Report     SOLVE simple Using QCP From line 86
                         LOWER          LEVEL          UPPER         MARGINAL
 
 USA   .primary            .              .              .          5500.0000      
-USA   .secondary          .              .              .          3100.0000      
+USA   .secondary          .              .              .          3186.2323      
 EU    .primary            .              .              .          3700.0000      
-EU    .secondary          .              .              .          3300.0000      
+EU    .secondary          .              .              .          2986.2323      
 OECD  .primary            .              .              .          3550.0000      
-OECD  .secondary          .              .              .          3100.0000      
+OECD  .secondary          .              .              .          3186.2323      
 N_OECD.primary            .              .              .          3150.0000      
-N_OECD.secondary          .              .              .          3500.0000      
+N_OECD.secondary          .              .              .          3586.2323      
 
 ---- VAR Qd  
 
                         LOWER          LEVEL          UPPER         MARGINAL
 
 USA   .primary            .       3500000.0000        +INF             .          
-USA   .secondary          .       3300000.0000        +INF            EPS         
-EU    .primary            .       7500000.0000        +INF             .          
-EU    .secondary          .       6200000.0000        +INF             .          
+USA   .secondary          .       3254102.1879        +INF             .          
+EU    .primary            .       7500000.0000        +INF            EPS         
+EU    .secondary          .       6494751.5199        +INF             .          
 OECD  .primary            .       4500000.0000        +INF            EPS         
-OECD  .secondary          .       4500000.0000        +INF      -3.63798E-12      
+OECD  .secondary          .       4437412.0744        +INF             .          
 N_OECD.primary            .       5.7500000E+7        +INF             .          
-N_OECD.secondary          .       1.6000000E+7        +INF             .          
+N_OECD.secondary          .       1.5802898E+7        +INF             .          
 
 ---- VAR Qs  
 
                         LOWER          LEVEL          UPPER         MARGINAL
 
 USA   .primary            .        700000.0000        +INF            EPS         
-USA   .secondary          .       5000000.0000        +INF             .          
-EU    .primary            .       3000000.0000        +INF            EPS         
-EU    .secondary          .       6900000.0000        +INF      3.637979E-12      
+USA   .secondary          .       5027816.8558        +INF      -1.36424E-12      
+EU    .primary            .       3000000.0000        +INF             .          
+EU    .secondary          .       6768788.0331        +INF            EPS         
 OECD  .primary            .       7300000.0000        +INF             .          
-OECD  .secondary          .       5300000.0000        +INF             .          
+OECD  .secondary          .       5329485.8672        +INF            EPS         
 N_OECD.primary            .       6.2000000E+7        +INF      9.094947E-13      
-N_OECD.secondary          .       1.2800000E+7        +INF            EPS         
+N_OECD.secondary          .       1.2863073E+7        +INF      1.818989E-12      
 
                            LOWER          LEVEL          UPPER         MARGINAL
 
----- VAR W                 -INF      1.531365E+12        +INF             .          
+---- VAR W                 -INF      1.254651E+12        +INF             .          
 
   W  total welfare
 
@@ -323,27 +304,27 @@ N_OECD.secondary          .       1.2800000E+7        +INF            EPS
                                LOWER          LEVEL          UPPER         MARGINAL
 
 USA   .EU    .primary            .              .            +INF        -3600.0000      
-USA   .EU    .secondary          .        505986.1357        +INF            EPS         
+USA   .EU    .secondary          .              .            +INF         -400.0000      
 USA   .OECD  .primary            .              .            +INF        -3900.0000      
-USA   .OECD  .secondary          .        597006.9321        +INF            EPS         
+USA   .OECD  .secondary          .        509937.0797        +INF            EPS         
 USA   .N_OECD.primary            .              .            +INF        -4700.0000      
-USA   .N_OECD.secondary          .        597006.9321        +INF            EPS         
-EU    .USA   .primary            .       2800000.0000        +INF            EPS         
-EU    .USA   .secondary          .              .            +INF         -400.0000      
+USA   .N_OECD.secondary          .       1469912.4869        +INF            EPS         
+EU    .USA   .primary            .       2800000.0000        +INF      -1.81899E-12      
+EU    .USA   .secondary          .        206134.8987        +INF            EPS         
 EU    .OECD  .primary            .              .            +INF         -300.0000      
-EU    .OECD  .secondary          .              .            +INF         -400.0000      
+EU    .OECD  .secondary          .         67901.6145        +INF            EPS         
 EU    .N_OECD.primary            .              .            +INF        -1100.0000      
-EU    .N_OECD.secondary          .       1436399.2195        +INF            EPS         
+EU    .N_OECD.secondary          .              .              .           400.0000      
 OECD  .USA   .primary            .              .            +INF            EPS         
 OECD  .USA   .secondary          .              .            +INF            EPS         
 OECD  .EU    .primary            .       2800000.0000        +INF            EPS         
-OECD  .EU    .secondary          .        230413.0838        +INF            EPS         
+OECD  .EU    .secondary          .              .            +INF         -400.0000      
 OECD  .N_OECD.primary            .              .            +INF         -800.0000      
-OECD  .N_OECD.secondary          .       1166593.8483        +INF      -5.45697E-12      
+OECD  .N_OECD.secondary          .       1469912.4869        +INF            EPS         
 N_OECD.USA   .primary            .              .            +INF            EPS         
 N_OECD.USA   .secondary          .              .            +INF         -800.0000      
 N_OECD.EU    .primary            .       4500000.0000        +INF      -9.09495E-13      
-N_OECD.EU    .secondary          .              .            +INF         -400.0000      
+N_OECD.EU    .secondary          .              .            +INF         -800.0000      
 N_OECD.OECD  .primary            .              .            +INF            EPS         
 N_OECD.OECD  .secondary          .              .            +INF         -800.0000      
 
@@ -352,12 +333,12 @@ N_OECD.OECD  .secondary          .              .            +INF         -800.0
                              0 INFEASIBLE
                              0  UNBOUNDED
                              0     ERRORS
-GAMS 54.3.1  61154be4 Aug 21, 2026          WEX-WEI x86 64bit/MS Windows - 10/09/26 10:55:54 Page 7
+GAMS 54.3.1  61154be4 Aug 21, 2026          WEX-WEI x86 64bit/MS Windows - 10/09/26 11:25:05 Page 7
 G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
 E x e c u t i o n
 
 
-EXECUTION TIME       =        0.188 SECONDS      4 MB  54.3.1 61154be4 WEX-WEI
+EXECUTION TIME       =        0.125 SECONDS      4 MB  54.3.1 61154be4 WEX-WEI
 
 
 USER: Course License                                 G260809+0003Ac-GEN

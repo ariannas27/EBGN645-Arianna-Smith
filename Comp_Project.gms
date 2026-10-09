@@ -1,16 +1,15 @@
-
+*!!!!!!!!!EU EXPORT BAN!!!!!!
 *current sets: regions (US, EU, OECD (-EU countries in OECD and US), Non-OECD(essentially row now?)), aluminum type (primary or secondary)
 **may further complicate the regions set, Certainly add canada next (next situation is US Tariffs)
 *will have to add time dimension, this is another set? 
-*****NEXT STEPS: FIND ACCURATE DATA, EU EXPORT BAN, ADD CANADA, US TARIFFS******
+*****NEXT STEPS: FIND more ACCURATE DATA, ADD CANADA, US TARIFFS******
 
 set r /USA, EU, OECD, N_OECD/;
 set al /primary, secondary/;
 
 *parameters = essentially cost curves, !!!!!!!!FIND BETTER NUMBERS!!!!! - currently using rough estimated numbers from AI 
-*prices USD/metric ton , qty = metric tons , currently total aluminum (primary + secondary) 
+*prices USD/metric ton , qty = metric tons 
 parameter 
-****NUMBERS ARE PRETTY RANDOM NEED TO SEARCH FOR BETTER DATA**************
 *!!!!!!!!!!!!!!!!Prices for Importers need to be higher than the respective exporters!!!!!!!!!!!!!!!! 
 pbar(r,al) /USA.primary 5500, USA.secondary 3100, EU.primary 3700, EU.secondary 3300, OECD.primary 3550, OECD.secondary 3100, N_OECD.primary 3150, N_OECD.secondary 3500/,
 *qty supplied aluminum USA and ROW 
@@ -34,44 +33,25 @@ c(r,al) = pbar(r,al) - d(r,al) * qbar_s(r,al);
 alias(r,rr); 
 *t will essentially be the cost of transportation
 parameter t(r,rr,al);
-*transport of primary from OECD to USA
-*t("OECD", "primary") = pbar("USA", "primary") - pbar("OECD", "primary");
-*transport of primary from non-oecd to EU 
-*t("N_OECD", "primary") = pbar("EU", "primary") - pbar("N_OECD", "primary");
-*transport of secondary from US to non OECD 
-*t("USA", "secondary") = pbar("N_OECD", "secondary") - pbar("USA", "secondary");
-*transport of secondary from EU to non-OECD 
-*t("EU", "secondary") = pbar("N_OECD", "secondary") - pbar("EU", "secondary");
-*transport of secondary from OECD to non-OECD 
-*t("OECD", "secondary") = pbar("N_OECD", "secondary") - pbar("OECD", "secondary");
+
 
 t(r,rr,al) = abs(pbar(rr,al) - pbar(r,al)) ; 
 
-*varibales - will have to have more specefic to primary and secondary
+
 positive variable Qd(r,al), Qs(r,al);
-**!!!!needs to be for region too!!!!
+
 * variable X(r,al) "exports"; 
 variable W "total welfare";
 
 *market clearing conditions 
 equation objfn; 
-*, market_clearing_USA, market_clearing_EU, market_clearing_OECD, market_clearing_N_OECD;
 
-
-** market clearning for each region: OECD exports primary to US, Non-OECD exports primary to EU, US EU and OECD export secondary to non-oecd 
-*US imports primary, export secondary 
-*market_clearing_USA(al).. Qd('USA',al) + X('USA',al)$sameas(al,"secondary") =e= Qs('USA',al) + X('USA',al)$sameas(al,"primary");
-**EU imports primary, exports secondary 
-*market_clearing_EU(al).. Qd('EU',al) + X('EU',al)$sameas(al,"secondary") =e= Qs('EU',al) + X('EU',al)$sameas(al,"primary");
-*OECD exports primary and secondary
-*market_clearing_OECD(al).. Qd('OECD',al) + X('OECD',al) =e= Qs('OECD',al);
-*non oecd exports primary and imports secondary 
-*market_clearing_N_OECD(al).. Qd('N_OECD',al) + X('N_OECD',al)$sameas(al,"primary") =e= Qs('N_OECD',al) + X('N_OECD',al)$sameas(al,"secondary");
 
 
 alias(r,rr) ; 
 positive variable ship(r,rr,al) ; 
-
+*no exports of secondary aluminum from EU to non-OECD
+ship.fx('EU', 'N_OECD', 'secondary') = 0;
 
 objfn.. W =e=  
    sum((r,al), a(r,al) * Qd(r,al) + b(r,al) * Qd(r,al) *Qd(r,al) /2 
@@ -89,10 +69,10 @@ solve simple using QCP maximizing W;
 
 parameter rep;
 
-rep("BAU", "Qd", r, al) = Qd.l(r,al);
-rep("BAU", "Qs", r, al) = Qs.l(r,al);
-rep("BAU", "P", r, al) = market_clearing_r.m(r,al);
+rep("EU secondary ban to non-oecd", "Qd", r, al) = Qd.l(r,al);
+rep("EU secondary ban to non-oecd", "Qs", r, al) = Qs.l(r,al);
+rep("EU secondary ban to non-oecd", "P", r, al) = market_clearing_r.m(r,al);
 
-execute_unload "simple.gdx" ;
+execute_unload "eu_export_ban.gdx" ;
 
 

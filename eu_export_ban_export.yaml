@@ -1,0 +1,114 @@
+- GDXReader:
+    file: C:\Users\alsmi\OneDrive\Documents\GitHub\EBGN645 Arianna Smith\eu_export_ban.gdx
+    symbols: 
+      - name: r
+      - name: al
+      - name: pbar
+      - name: qbar_s
+      - name: qbar_d
+      - name: e_s
+      - name: e_d
+      - name: a
+      - name: b
+      - name: c
+      - name: d
+      - name: r
+      - name: t
+      - name: Qd
+      - name: Qs
+      - name: W
+      - name: objfn
+      - name: ship
+      - name: market_clearing_r
+      - name: rep
+- Projection:
+    name: r(0)
+    newName: rr(0)
+- Projection:
+    name: Qd.all(0,1)
+    newName: Qd_proj_(0,1)
+- Projection:
+    name: Qs.all(0,1)
+    newName: Qs_proj_(0,1)
+- Projection:
+    name: W.all
+    newName: W_proj_
+- Projection:
+    name: objfn.all
+    newName: objfn_proj_
+- Projection:
+    name: ship.all(0,1,2)
+    newName: ship_proj_(0,1,2)
+- Projection:
+    name: market_clearing_r.all(0,1)
+    newName: market_clearing_r_proj_(0,1)
+- ExcelWriter:
+    file: C:\Users\alsmi\OneDrive\Documents\GitHub\EBGN645 Arianna Smith\postban_EU_NOECD.xlsx
+    valueSubstitutions: {
+      EPS: EPS,
+      INF: INF,
+      -INF: -INF,
+      UNDEF: UNDEF,
+      NA: NA
+    }
+    symbols:
+      - name: r
+        range: r!A1
+        columnDimension: 0
+      - name: al
+        range: al!A1
+        columnDimension: 0
+      - name: pbar
+        range: pbar!A1
+        columnDimension: 0
+      - name: qbar_s
+        range: qbar_s!A1
+        columnDimension: 0
+      - name: qbar_d
+        range: qbar_d!A1
+        columnDimension: 0
+      - name: e_s
+        range: e_s!A1
+        columnDimension: 0
+      - name: e_d
+        range: e_d!A1
+        columnDimension: 0
+      - name: a
+        range: a!A1
+        columnDimension: 0
+      - name: b
+        range: b!A1
+        columnDimension: 0
+      - name: c
+        range: c!A1
+        columnDimension: 0
+      - name: d
+        range: d!A1
+        columnDimension: 0
+      - name: rr
+        range: rr!A1
+        columnDimension: 0
+      - name: t
+        range: t!A1
+        columnDimension: 0
+      - name: Qd_proj_
+        range: Qd!A1
+        columnDimension: 1
+      - name: Qs_proj_
+        range: Qs!A1
+        columnDimension: 1
+      - name: W_proj_
+        range: W!A1
+        columnDimension: 1
+      - name: objfn_proj_
+        range: objfn!A1
+        columnDimension: 1
+      - name: ship_proj_
+        range: ship!A1
+        columnDimension: 1
+      - name: market_clearing_r_proj_
+        range: market_clearing_r!A1
+        columnDimension: 1
+      - name: rep
+        range: rep!A1
+        columnDimension: 0
