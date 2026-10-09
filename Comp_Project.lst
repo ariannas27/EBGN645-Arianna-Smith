@@ -1,4 +1,4 @@
-GAMS 54.3.1  61154be4 Aug 21, 2026          WEX-WEI x86 64bit/MS Windows - 10/07/26 14:05:29 Page 1
+GAMS 54.3.1  61154be4 Aug 21, 2026          WEX-WEI x86 64bit/MS Windows - 10/09/26 10:40:47 Page 1
 G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
 C o m p i l a t i o n
 
@@ -103,8 +103,8 @@ C o m p i l a t i o n
   98   
 
 
-COMPILATION TIME     =        0.016 SECONDS      3 MB  54.3.1 61154be4 WEX-WEI
-GAMS 54.3.1  61154be4 Aug 21, 2026          WEX-WEI x86 64bit/MS Windows - 10/07/26 14:05:29 Page 2
+COMPILATION TIME     =        0.015 SECONDS      3 MB  54.3.1 61154be4 WEX-WEI
+GAMS 54.3.1  61154be4 Aug 21, 2026          WEX-WEI x86 64bit/MS Windows - 10/09/26 10:40:47 Page 2
 G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
 Equation Listing    SOLVE simple Using QCP From line 86
 
@@ -124,7 +124,7 @@ market_clearing_r(EU,primary)..  Qd(EU,primary) - Qs(EU,primary) - ship(USA,EU,p
      
 REMAINING 5 ENTRIES SKIPPED
 
-GAMS 54.3.1  61154be4 Aug 21, 2026          WEX-WEI x86 64bit/MS Windows - 10/07/26 14:05:29 Page 3
+GAMS 54.3.1  61154be4 Aug 21, 2026          WEX-WEI x86 64bit/MS Windows - 10/09/26 10:40:47 Page 3
 G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
 Column Listing      SOLVE simple Using QCP From line 86
 
@@ -195,7 +195,7 @@ ship(USA,OECD,primary)
        -1       market_clearing_r(OECD,primary)
 
 REMAINING 21 ENTRIES SKIPPED
-GAMS 54.3.1  61154be4 Aug 21, 2026          WEX-WEI x86 64bit/MS Windows - 10/07/26 14:05:29 Page 4
+GAMS 54.3.1  61154be4 Aug 21, 2026          WEX-WEI x86 64bit/MS Windows - 10/09/26 10:40:47 Page 4
 G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
 Range Statistics    SOLVE simple Using QCP From line 86
 
@@ -206,7 +206,7 @@ RHS       [min, max] : [        NA,        NA] - Zero values observed as well
 Bound     [min, max] : [        NA,        NA] - Zero values observed as well
 Matrix    [min, max] : [ 1.000E+00, 1.925E+04]
 
-GAMS 54.3.1  61154be4 Aug 21, 2026          WEX-WEI x86 64bit/MS Windows - 10/07/26 14:05:29 Page 5
+GAMS 54.3.1  61154be4 Aug 21, 2026          WEX-WEI x86 64bit/MS Windows - 10/09/26 10:40:47 Page 5
 G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
 Model Statistics    SOLVE simple Using QCP From line 86
 
@@ -219,8 +219,8 @@ NON ZERO ELEMENTS           103     NON LINEAR N-Z             16
 CODE LENGTH                 114     CONSTANT POOL              46
 
 
-GENERATION TIME      =        0.000 SECONDS      4 MB  54.3.1 61154be4 WEX-WEI
-GAMS 54.3.1  61154be4 Aug 21, 2026          WEX-WEI x86 64bit/MS Windows - 10/07/26 14:05:29 Page 6
+GENERATION TIME      =        0.016 SECONDS      4 MB  54.3.1 61154be4 WEX-WEI
+GAMS 54.3.1  61154be4 Aug 21, 2026          WEX-WEI x86 64bit/MS Windows - 10/09/26 10:40:47 Page 6
 G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
 Solution Report     SOLVE simple Using QCP From line 86
 
@@ -235,7 +235,7 @@ Solution Report     SOLVE simple Using QCP From line 86
 **** MODEL STATUS      2 Locally Optimal
 **** OBJECTIVE VALUE     850506250000.0000
 
- RESOURCE USAGE, LIMIT          0.156 10000000000.000
+ RESOURCE USAGE, LIMIT          0.125 10000000000.000
  ITERATION COUNT, LIMIT        10    2147483647
  EVALUATION ERRORS              0             0
  
@@ -261,11 +261,11 @@ Solution Report     SOLVE simple Using QCP From line 86
  ** Optimal solution. Reduced gradient less than tolerance.
  
  
- CONOPT time Total                            0.022 seconds
+ CONOPT time Total                            0.011 seconds
    of which: Function evaluations             0.000 =  0.0%
              1st Derivative evaluations       0.000 =  0.0%
-             2nd Derivative evaluations       0.001 =  4.5%
-             Directional 2nd Deriv(Hess)      0.000 =  0.0%
+             2nd Derivative evaluations       0.001 =  9.1%
+             Directional 2nd Deriv(Hess)      0.002 = 18.2%
              Interval derivative evals        0.000 =  0.0%
  
 
@@ -352,12 +352,12 @@ N_OECD.OECD  .secondary          .              .            +INF         -800.0
                              0 INFEASIBLE
                              0  UNBOUNDED
                              0     ERRORS
-GAMS 54.3.1  61154be4 Aug 21, 2026          WEX-WEI x86 64bit/MS Windows - 10/07/26 14:05:29 Page 7
+GAMS 54.3.1  61154be4 Aug 21, 2026          WEX-WEI x86 64bit/MS Windows - 10/09/26 10:40:47 Page 7
 G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
 E x e c u t i o n
 
 
-EXECUTION TIME       =        0.500 SECONDS      4 MB  54.3.1 61154be4 WEX-WEI
+EXECUTION TIME       =        0.406 SECONDS      4 MB  54.3.1 61154be4 WEX-WEI
 
 
 USER: Course License                                 G260809+0003Ac-GEN

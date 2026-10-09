@@ -19,9 +19,9 @@ qbar_s(r,al) /USA.primary 700000, USA.secondary 5000000, EU.primary 3000000, EU.
 qbar_d(r,al) /USA.primary 3500000, USA.secondary 3300000, EU.primary 7500000, EU.secondary 6200000, OECD.primary 4500000, OECD.secondary 4500000, N_OECD.primary 57500000, N_OECD.secondary 16000000/,
 **!!!!!change for at least primary and secondary for now!!!!
 *elasticity of supply
-e_s(r,al) /USA.primary 0.4, USA.secondary 0.4, EU.primary 0.4, EU.secondary 0.4, OECD.primary 0.4, OECD.secondary 0.4, N_OECD.primary 0.4, N_OECD.secondary 0.4/,
+e_s(r,al) /USA.primary 0.4, USA.secondary 0.2, EU.primary 0.4, EU.secondary 0.2, OECD.primary 0.2, OECD.secondary 0.2, N_OECD.primary 0.2, N_OECD.secondary 0.2/,
 *elasticity of demand 
-e_d(r,al) /USA.primary -0.4, USA.secondary -0.4, EU.primary -0.4, EU.secondary -0.4, OECD.primary -0.4, OECD.secondary -0.4, N_OECD.primary -0.4, N_OECD.secondary -0.4/;
+e_d(r,al) /USA.primary -0.2, USA.secondary -0.5, EU.primary -0.2, EU.secondary -0.5, OECD.primary -0.2, OECD.secondary -0.5, N_OECD.primary -0.2, N_OECD.secondary -0.5/;
 
 *currently based off of Pd = a + b*Qd, Ps = c + d*Qs, where a,b,c,d are parameters
 parameter a(r,al),b(r,al),c(r,al),d(r,al); 
