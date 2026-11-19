@@ -1,0 +1,572 @@
+GAMS 54.3.1  61154be4 Aug 21, 2026          WEX-WEI x86 64bit/MS Windows - 11/14/26 13:19:25 Page 1
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+C o m p i l a t i o n
+
+
+   1  *current regions: EU-27, Open-Destinations (OpD), Closed-Destinations(RoW)
+   2  set r /EU, OpD, RoW/;
+   3  set al /primary, scrap/;
+   4   
+   5   
+   6  *prices USD/metric ton , qty =  metric tons, currently total aluminum (primary + scrap)
+   7  parameter
+   8  ****NUMBERS ARE PRETTY RANDOM NEED TO SEARCH FOR BETTER DATA**************
+   9  *!!!!!!!!!!!!!!!!Prices for Importers need to be higher than the respective exporters!!!!!!!!!!!!!!!!
+  10  pbar(r,al) /EU.primary 2768, EU.scrap 1745, OpD.primary 2784, OpD.scrap 1707, RoW.primary 2419, RoW.scrap 2020/,
+  11  *qty supplied aluminum EU, Open-Destinations, and Closed-Destinations
+  12  qbar_s(r,al) /EU.primary 1200000, EU.scrap 5586616, OpD.primary 7898000, OpD.scrap 6113480, RoW.primary 63702000, RoW.scrap 29999904/,
+  13  *qty demanded aluminum EU, Open-Destinations, and Closed-Destinations
+  14  qbar_d(r,al) /EU.primary 6000000, EU.scrap 5000000, OpD.primary 8501419, OpD.scrap 4374909, RoW.primary 58298581, RoW.scrap 32325091/,
+  15   
+  16  *elasticity of supply
+  17  e_s(r,al) /EU.primary 0.4, EU.scrap 0.21, OpD.primary 0.4, OpD.scrap 0.21, RoW.primary 0.4, RoW.scrap 0.21/,
+  18  *elasticity of demand
+  19  e_d(r,al) /EU.primary -0.2, EU.scrap -0.5, OpD.primary -0.2, OpD.scrap -0.5, RoW.primary -0.2, RoW.scrap -0.5/;
+  20   
+  21  *currently based off of Pd = a + b*Qd, Ps = c + d*Qs, where a,b,c,d are parameters
+  22  parameter a(r,al),b(r,al),c(r,al),d(r,al);
+  23   
+  24  b(r,al) = pbar(r,al) / (e_d(r,al) * qbar_d(r,al));
+  25  a(r,al) = pbar(r,al) - b(r,al) * qbar_d(r,al);
+  26  d(r,al) = pbar(r,al) / (e_s(r,al) * qbar_s(r,al));
+  27  c(r,al) = pbar(r,al) - d(r,al) * qbar_s(r,al);
+  28   
+  29  alias(r,rr);
+  30  *t will essentially be the cost of transportation
+  31  parameter t(r,rr,al);
+  32   
+  33   
+  34  t(r,rr,al) = abs(pbar(rr,al) - pbar(r,al)) ;
+  35   
+  36  *varibales
+  37  positive variable Qd(r,al), Qs(r,al);
+  38  **!!!!needs to be for region too!!!!
+  39  * variable X(r,al) "exports";
+  40  variable W "total welfare";
+  41   
+  42  *market clearing conditions
+  43  equation objfn;
+  44   
+  45   
+  46  alias(r,rr) ;
+  47  positive variable ship(r,rr,al) ;
+  48   
+  49   
+  50  objfn.. W =e=
+  51     sum((r,al), a(r,al) * Qd(r,al) + b(r,al) * Qd(r,al) *Qd(r,al) /2
+  52     - c(r,al) * Qs(r,al) - d(r,al) *Qs(r,al) * Qs(r,al) / 2 )
+  53     - sum((r,rr,al), t(r,rr,al) * ship(r,rr,al));
+  54   
+  55  equation market_clearing_r(r,al) ;
+  56  market_clearing_r(r,al)..  Qd(r,al) + sum(rr$(not sameas(r,rr)), ship(r,rr,al)) =e= Qs(r,al) + sum(rr$(not sameas(r,rr)), ship(rr,r,al));
+  57   
+  58  model simple /all/;
+  59   
+  60  solve simple using QCP maximizing W;
+  61   
+  62  *$exit
+  63   
+  64  parameter rep;
+  65  parameter shiprep(*,r,rr,al) "shipments by route";
+  66   
+  67  *rep("BAU", "Qd", r, al) = Qd.l(r,al);
+  68  *rep("BAU", "Qs", r, al) = Qs.l(r,al);
+  69  *rep("BAU", "P", r, al)  = market_clearing_r.m(r,al);
+  70  *shiprep("BAU", r, rr, al) = ship.l(r,rr,al);
+  71   
+  72  *execute_unload "simple.gdx";
+  73   
+  74  ****************Scrap ban from eu to closed destinations (row)****************
+  75  ship.fx('EU','RoW','scrap') = 0;
+  76   
+  77  solve simple using QCP maximizing W;
+  78   
+  79  rep("BAN", "Qd", r, al) = Qd.l(r,al);
+  80  rep("BAN", "Qs", r, al) = Qs.l(r,al);
+  81  rep("BAN", "P", r, al)  = market_clearing_r.m(r,al);
+  82  shiprep("BAN", r, rr, al) = ship.l(r,rr,al);
+  83   
+  84  execute_unload "simple.gdx";
+  85   
+  86   
+
+
+COMPILATION TIME     =        0.000 SECONDS      3 MB  54.3.1 61154be4 WEX-WEI
+GAMS 54.3.1  61154be4 Aug 21, 2026          WEX-WEI x86 64bit/MS Windows - 11/14/26 13:19:25 Page 2
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+Equation Listing    SOLVE simple Using QCP From line 60
+
+
+---- objfn  =E=  
+
+objfn..  - (16608)*Qd(EU,primary) - (5235)*Qd(EU,scrap) - (16704)*Qd(OpD,primary) - (5121)*Qd(OpD,scrap) - (14514)*Qd(RoW,primary) - (6060)*Qd(RoW,scrap) - (4152)*Qs(EU,primary) - (6564.52380952381)*Qs(EU,scrap) - (4176)*Qs(OpD,primary) - (6421.57142857143)*Qs(OpD,scrap) - (3628.5)*Qs(RoW,primary) - (7599.04761904762)*Qs(RoW,scrap) + W + 16*ship(EU,OpD,primary) + 38*ship(EU,OpD,scrap) + 349*ship(EU,RoW,primary) + 275*ship(EU,RoW,scrap) + 16*ship(OpD,EU,primary) + 38*ship(OpD,EU,scrap) + 365*ship(OpD,RoW,primary) + 313*ship(OpD,RoW,scrap) + 349*ship(RoW,EU,primary) + 275*ship(RoW,EU,scrap) + 365*ship(RoW,OpD,primary) + 313*ship(RoW,OpD,scrap) =E= 0 ; (LHS = 0)
+     
+
+---- market_clearing_r  =E=  
+
+market_clearing_r(EU,primary)..  Qd(EU,primary) - Qs(EU,primary) + ship(EU,OpD,primary) + ship(EU,RoW,primary) - ship(OpD,EU,primary) - ship(RoW,EU,primary) =E= 0 ; (LHS = 0)
+     
+market_clearing_r(EU,scrap)..  Qd(EU,scrap) - Qs(EU,scrap) + ship(EU,OpD,scrap) + ship(EU,RoW,scrap) - ship(OpD,EU,scrap) - ship(RoW,EU,scrap) =E= 0 ; (LHS = 0)
+     
+market_clearing_r(OpD,primary)..  Qd(OpD,primary) - Qs(OpD,primary) - ship(EU,OpD,primary) + ship(OpD,EU,primary) + ship(OpD,RoW,primary) - ship(RoW,OpD,primary) =E= 0 ; (LHS = 0)
+     
+REMAINING 3 ENTRIES SKIPPED
+
+GAMS 54.3.1  61154be4 Aug 21, 2026          WEX-WEI x86 64bit/MS Windows - 11/14/26 13:19:25 Page 3
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+Column Listing      SOLVE simple Using QCP From line 60
+
+
+---- Qd  
+
+Qd(EU,primary)
+                (.LO, .L, .UP, .M = 0, 0, +INF, 0)
+  (-16608)      objfn
+        1       market_clearing_r(EU,primary)
+
+Qd(EU,scrap)
+                (.LO, .L, .UP, .M = 0, 0, +INF, 0)
+   (-5235)      objfn
+        1       market_clearing_r(EU,scrap)
+
+Qd(OpD,primary)
+                (.LO, .L, .UP, .M = 0, 0, +INF, 0)
+  (-16704)      objfn
+        1       market_clearing_r(OpD,primary)
+
+REMAINING 3 ENTRIES SKIPPED
+
+---- Qs  
+
+Qs(EU,primary)
+                (.LO, .L, .UP, .M = 0, 0, +INF, 0)
+   (-4152)      objfn
+       -1       market_clearing_r(EU,primary)
+
+Qs(EU,scrap)
+                (.LO, .L, .UP, .M = 0, 0, +INF, 0)
+   (-6564.5238) objfn
+       -1       market_clearing_r(EU,scrap)
+
+Qs(OpD,primary)
+                (.LO, .L, .UP, .M = 0, 0, +INF, 0)
+   (-4176)      objfn
+       -1       market_clearing_r(OpD,primary)
+
+REMAINING 3 ENTRIES SKIPPED
+
+---- W  total welfare
+
+W
+                (.LO, .L, .UP, .M = -INF, 0, +INF, 0)
+        1       objfn
+
+
+---- ship  
+
+ship(EU,OpD,primary)
+                (.LO, .L, .UP, .M = 0, 0, +INF, 0)
+       16       objfn
+        1       market_clearing_r(EU,primary)
+       -1       market_clearing_r(OpD,primary)
+
+ship(EU,OpD,scrap)
+                (.LO, .L, .UP, .M = 0, 0, +INF, 0)
+       38       objfn
+        1       market_clearing_r(EU,scrap)
+       -1       market_clearing_r(OpD,scrap)
+
+ship(EU,RoW,primary)
+                (.LO, .L, .UP, .M = 0, 0, +INF, 0)
+      349       objfn
+        1       market_clearing_r(EU,primary)
+       -1       market_clearing_r(RoW,primary)
+
+REMAINING 9 ENTRIES SKIPPED
+GAMS 54.3.1  61154be4 Aug 21, 2026          WEX-WEI x86 64bit/MS Windows - 11/14/26 13:19:25 Page 4
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+Range Statistics    SOLVE simple Using QCP From line 60
+
+
+RANGE STATISTICS (ABSOLUTE NON-ZERO FINITE VALUES)
+
+RHS       [min, max] : [        NA,        NA] - Zero values observed as well
+Bound     [min, max] : [        NA,        NA] - Zero values observed as well
+Matrix    [min, max] : [ 1.000E+00, 1.670E+04]
+
+GAMS 54.3.1  61154be4 Aug 21, 2026          WEX-WEI x86 64bit/MS Windows - 11/14/26 13:19:25 Page 5
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+Model Statistics    SOLVE simple Using QCP From line 60
+
+
+MODEL STATISTICS
+
+BLOCKS OF EQUATIONS           2     SINGLE EQUATIONS            7
+BLOCKS OF VARIABLES           4     SINGLE VARIABLES           25
+NON ZERO ELEMENTS            61     NON LINEAR N-Z             12
+CODE LENGTH                  86     CONSTANT POOL              40
+
+
+GENERATION TIME      =        0.000 SECONDS      4 MB  54.3.1 61154be4 WEX-WEI
+GAMS 54.3.1  61154be4 Aug 21, 2026          WEX-WEI x86 64bit/MS Windows - 11/14/26 13:19:25 Page 6
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+Solution Report     SOLVE simple Using QCP From line 60
+
+
+               S O L V E      S U M M A R Y
+
+     MODEL   simple              OBJECTIVE  W
+     TYPE    QCP                 DIRECTION  MAXIMIZE
+     SOLVER  CONOPT              FROM LINE  60
+
+**** SOLVER STATUS     1 Normal Completion
+**** MODEL STATUS      2 Locally Optimal
+**** OBJECTIVE VALUE     951339402153.8333
+
+ RESOURCE USAGE, LIMIT          0.047 10000000000.000
+ ITERATION COUNT, LIMIT         7    2147483647
+ EVALUATION ERRORS              0             0
+ 
+ 
+    C O N O P T   version 4.39.1
+    Copyright (C) GAMS Software GmbH
+                  GAMS Development Corporation
+ 
+    Will use up to 4 threads.
+ 
+ 
+    The user model has 7 constraints and 25 variables
+    with 61 Jacobian elements, 12 of which are nonlinear.
+    The Hessian of the Lagrangian has 12 elements on the diagonal,
+    0 elements below the diagonal, and 12 nonlinear variables.
+ 
+    The post-triangular part of the model has 1 constraints and variables.
+    There are 6 penalty and minimax constraints with 12 variables.
+ 
+    Preprocessed model has 6 constraints and 24 variables
+    with 36 Jacobian elements, 0 of which are nonlinear.
+ 
+ ** Optimal solution. Reduced gradient less than tolerance.
+ 
+ 
+ CONOPT time Total                            0.011 seconds
+   of which: Function evaluations             0.006 = 54.5%
+             1st Derivative evaluations       0.000 =  0.0%
+             2nd Derivative evaluations       0.000 =  0.0%
+             Directional 2nd Deriv(Hess)      0.000 =  0.0%
+             Interval derivative evals        0.000 =  0.0%
+ 
+
+                           LOWER          LEVEL          UPPER         MARGINAL
+
+---- EQU objfn               .              .              .             1.0000      
+
+---- EQU market_clearing_r  
+
+                   LOWER          LEVEL          UPPER         MARGINAL
+
+EU .primary          .              .              .          2768.0000      
+EU .scrap            .              .              .          1745.0000      
+OpD.primary          .              .              .          2784.0000      
+OpD.scrap            .              .              .          1707.0000      
+RoW.primary          .              .              .          2419.0000      
+RoW.scrap            .              .              .          2020.0000      
+
+---- VAR Qd  
+
+                   LOWER          LEVEL          UPPER         MARGINAL
+
+EU .primary          .       6000000.0000        +INF             .          
+EU .scrap            .       5000000.0000        +INF      -2.72848E-12      
+OpD.primary          .       8501419.0000        +INF             .          
+OpD.scrap            .       4374909.0000        +INF             .          
+RoW.primary          .       5.8298581E+7        +INF             .          
+RoW.scrap            .       3.2325091E+7        +INF             .          
+
+---- VAR Qs  
+
+                   LOWER          LEVEL          UPPER         MARGINAL
+
+EU .primary          .       1200000.0000        +INF      -3.63798E-12      
+EU .scrap            .       5586616.0000        +INF             .          
+OpD.primary          .       7898000.0000        +INF            EPS         
+OpD.scrap            .       6113480.0000        +INF      2.501110E-12      
+RoW.primary          .       6.3702000E+7        +INF      9.094947E-13      
+RoW.scrap            .       2.9999904E+7        +INF      4.547474E-12      
+
+                           LOWER          LEVEL          UPPER         MARGINAL
+
+---- VAR W                 -INF      9.513394E+11        +INF             .          
+
+  W  total welfare
+
+---- VAR ship  
+
+                       LOWER          LEVEL          UPPER         MARGINAL
+
+EU .OpD.primary          .             0.0027        +INF            EPS         
+EU .OpD.scrap            .              .            +INF          -76.0000      
+EU .RoW.primary          .              .            +INF         -698.0000      
+EU .RoW.scrap            .        586616.0390        +INF            EPS         
+OpD.EU .primary          .              .            +INF          -32.0000      
+OpD.EU .scrap            .             0.0390        +INF            EPS         
+OpD.RoW.primary          .              .            +INF         -730.0000      
+OpD.RoW.scrap            .       1738570.9610        +INF            EPS         
+RoW.EU .primary          .       4800000.0027        +INF      -4.54747E-12      
+RoW.EU .scrap            .              .            +INF         -550.0000      
+RoW.OpD.primary          .        603418.9973        +INF            EPS         
+RoW.OpD.scrap            .              .            +INF         -626.0000      
+
+
+**** REPORT SUMMARY :        0     NONOPT
+                             0 INFEASIBLE
+                             0  UNBOUNDED
+                             0     ERRORS
+GAMS 54.3.1  61154be4 Aug 21, 2026          WEX-WEI x86 64bit/MS Windows - 11/14/26 13:19:25 Page 7
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+Equation Listing    SOLVE simple Using QCP From line 77
+
+
+---- objfn  =E=  
+
+objfn..  - (2768)*Qd(EU,primary) - (1745)*Qd(EU,scrap) - (2784)*Qd(OpD,primary) - (1707)*Qd(OpD,scrap) - (2419)*Qd(RoW,primary) - (2020)*Qd(RoW,scrap) + (2768)*Qs(EU,primary) + (1745)*Qs(EU,scrap) + (2784)*Qs(OpD,primary) + (1707)*Qs(OpD,scrap) + (2419)*Qs(RoW,primary) + (2020)*Qs(RoW,scrap) + W + 16*ship(EU,OpD,primary) + 38*ship(EU,OpD,scrap) + 349*ship(EU,RoW,primary) + 275*ship(EU,RoW,scrap) + 16*ship(OpD,EU,primary) + 38*ship(OpD,EU,scrap) + 365*ship(OpD,RoW,primary) + 313*ship(OpD,RoW,scrap) + 349*ship(RoW,EU,primary) + 275*ship(RoW,EU,scrap) + 365*ship(RoW,OpD,primary) + 313*ship(RoW,OpD,scrap) =E= 0 ; (LHS = -161319410.7229, INFES = 161319410.7229 ****)
+     
+
+---- market_clearing_r  =E=  
+
+market_clearing_r(EU,primary)..  Qd(EU,primary) - Qs(EU,primary) + ship(EU,OpD,primary) + ship(EU,RoW,primary) - ship(OpD,EU,primary) - ship(RoW,EU,primary) =E= 0 ; (LHS = 0)
+     
+market_clearing_r(EU,scrap)..  Qd(EU,scrap) - Qs(EU,scrap) + ship(EU,OpD,scrap) + ship(EU,RoW,scrap) - ship(OpD,EU,scrap) - ship(RoW,EU,scrap) =E= 0 ; (LHS = -586616.038992085, INFES = 586616.038992085 ****)
+     
+market_clearing_r(OpD,primary)..  Qd(OpD,primary) - Qs(OpD,primary) - ship(EU,OpD,primary) + ship(OpD,EU,primary) + ship(OpD,RoW,primary) - ship(RoW,OpD,primary) =E= 0 ; (LHS = 0)
+     
+REMAINING 3 ENTRIES SKIPPED
+
+GAMS 54.3.1  61154be4 Aug 21, 2026          WEX-WEI x86 64bit/MS Windows - 11/14/26 13:19:25 Page 8
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+Column Listing      SOLVE simple Using QCP From line 77
+
+
+---- Qd  
+
+Qd(EU,primary)
+                (.LO, .L, .UP, .M = 0, 6000000, +INF, 0)
+   (-2768)      objfn
+        1       market_clearing_r(EU,primary)
+
+Qd(EU,scrap)
+                (.LO, .L, .UP, .M = 0, 5000000, +INF, -2.72848410531878E-12)
+   (-1745)      objfn
+        1       market_clearing_r(EU,scrap)
+
+Qd(OpD,primary)
+                (.LO, .L, .UP, .M = 0, 8501419, +INF, 0)
+   (-2784)      objfn
+        1       market_clearing_r(OpD,primary)
+
+REMAINING 3 ENTRIES SKIPPED
+
+---- Qs  
+
+Qs(EU,primary)
+                (.LO, .L, .UP, .M = 0, 1200000, +INF, -3.63797880709171E-12)
+    (2768)      objfn
+       -1       market_clearing_r(EU,primary)
+
+Qs(EU,scrap)
+                (.LO, .L, .UP, .M = 0, 5586616, +INF, 0)
+    (1745)      objfn
+       -1       market_clearing_r(EU,scrap)
+
+Qs(OpD,primary)
+                (.LO, .L, .UP, .M = 0, 7898000, +INF, EPS)
+    (2784)      objfn
+       -1       market_clearing_r(OpD,primary)
+
+REMAINING 3 ENTRIES SKIPPED
+
+---- W  total welfare
+
+W
+                (.LO, .L, .UP, .M = -INF, 951339402153.833, +INF, 0)
+        1       objfn
+
+
+---- ship  
+
+ship(EU,OpD,primary)
+                (.LO, .L, .UP, .M = 0, 0.00274494416758011, +INF, EPS)
+       16       objfn
+        1       market_clearing_r(EU,primary)
+       -1       market_clearing_r(OpD,primary)
+
+ship(EU,OpD,scrap)
+                (.LO, .L, .UP, .M = 0, 0, +INF, -76.0000000000002)
+       38       objfn
+        1       market_clearing_r(EU,scrap)
+       -1       market_clearing_r(OpD,scrap)
+
+ship(EU,RoW,primary)
+                (.LO, .L, .UP, .M = 0, 0, +INF, -697.999999999995)
+      349       objfn
+        1       market_clearing_r(EU,primary)
+       -1       market_clearing_r(RoW,primary)
+
+REMAINING 9 ENTRIES SKIPPED
+GAMS 54.3.1  61154be4 Aug 21, 2026          WEX-WEI x86 64bit/MS Windows - 11/14/26 13:19:25 Page 9
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+Range Statistics    SOLVE simple Using QCP From line 77
+
+
+RANGE STATISTICS (ABSOLUTE NON-ZERO FINITE VALUES)
+
+RHS       [min, max] : [        NA,        NA] - Zero values observed as well
+Bound     [min, max] : [        NA,        NA] - Zero values observed as well
+Matrix    [min, max] : [ 1.000E+00, 2.784E+03]
+
+GAMS 54.3.1  61154be4 Aug 21, 2026          WEX-WEI x86 64bit/MS Windows - 11/14/26 13:19:25 Page 10
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+Model Statistics    SOLVE simple Using QCP From line 77
+
+
+MODEL STATISTICS
+
+BLOCKS OF EQUATIONS           2     SINGLE EQUATIONS            7
+BLOCKS OF VARIABLES           4     SINGLE VARIABLES           25
+NON ZERO ELEMENTS            61     NON LINEAR N-Z             12
+CODE LENGTH                  86     CONSTANT POOL              40
+
+
+GENERATION TIME      =        0.000 SECONDS      4 MB  54.3.1 61154be4 WEX-WEI
+GAMS 54.3.1  61154be4 Aug 21, 2026          WEX-WEI x86 64bit/MS Windows - 11/14/26 13:19:25 Page 11
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+Solution Report     SOLVE simple Using QCP From line 77
+
+
+               S O L V E      S U M M A R Y
+
+     MODEL   simple              OBJECTIVE  W
+     TYPE    QCP                 DIRECTION  MAXIMIZE
+     SOLVER  CONOPT              FROM LINE  77
+
+**** SOLVER STATUS     1 Normal Completion
+**** MODEL STATUS      2 Locally Optimal
+**** OBJECTIVE VALUE     951300059873.6710
+
+ RESOURCE USAGE, LIMIT          0.063 10000000000.000
+ ITERATION COUNT, LIMIT         4    2147483647
+ EVALUATION ERRORS              0             0
+ 
+ 
+    C O N O P T   version 4.39.1
+    Copyright (C) GAMS Software GmbH
+                  GAMS Development Corporation
+ 
+    Will use up to 4 threads.
+ 
+ 
+    The user model has 7 constraints and 25 variables
+    with 61 Jacobian elements, 12 of which are nonlinear.
+    The Hessian of the Lagrangian has 12 elements on the diagonal,
+    0 elements below the diagonal, and 12 nonlinear variables.
+ 
+    The pre-triangular part of the model has 0 constraints and 1 variables.
+    The post-triangular part of the model has 1 constraints and variables.
+    There are 6 penalty and minimax constraints with 12 variables.
+ 
+    Preprocessed model has 6 constraints and 23 variables
+    with 34 Jacobian elements, 0 of which are nonlinear.
+ 
+ ** Optimal solution. Reduced gradient less than tolerance.
+ 
+ 
+ CONOPT time Total                            0.014 seconds
+   of which: Function evaluations             0.000 =  0.0%
+             1st Derivative evaluations       0.000 =  0.0%
+             2nd Derivative evaluations       0.000 =  0.0%
+             Directional 2nd Deriv(Hess)      0.000 =  0.0%
+             Interval derivative evals        0.000 =  0.0%
+ 
+
+                           LOWER          LEVEL          UPPER         MARGINAL
+
+---- EQU objfn               .              .              .             1.0000      
+
+---- EQU market_clearing_r  
+
+                   LOWER          LEVEL          UPPER         MARGINAL
+
+EU .primary          .              .              .          2768.0000      
+EU .scrap            .              .              .          1679.4845      
+OpD.primary          .              .              .          2784.0000      
+OpD.scrap            .              .              .          1717.4845      
+RoW.primary          .              .              .          2419.0000      
+RoW.scrap            .              .              .          2030.4845      
+
+---- VAR Qd  
+
+                   LOWER          LEVEL          UPPER         MARGINAL
+
+EU .primary          .       6000000.0000        +INF      -4.54747E-12      
+EU .scrap            .       5093861.7808        +INF            EPS         
+OpD.primary          .       8501419.0000        +INF             .          
+OpD.scrap            .       4361473.5481        +INF      -1.81899E-12      
+RoW.primary          .       5.8298581E+7        +INF             .          
+RoW.scrap            .       3.2241202E+7        +INF             .          
+
+---- VAR Qs  
+
+                   LOWER          LEVEL          UPPER         MARGINAL
+
+EU .primary          .       1200000.0000        +INF            EPS         
+EU .scrap            .       5542568.9430        +INF             .          
+OpD.primary          .       7898000.0000        +INF            EPS         
+OpD.scrap            .       6121365.3512        +INF             .          
+RoW.primary          .       6.3702000E+7        +INF      9.094947E-13      
+RoW.scrap            .       3.0032603E+7        +INF      -1.59162E-12      
+
+                           LOWER          LEVEL          UPPER         MARGINAL
+
+---- VAR W                 -INF      9.513001E+11        +INF             .          
+
+  W  total welfare
+
+---- VAR ship  
+
+                       LOWER          LEVEL          UPPER         MARGINAL
+
+EU .OpD.primary          .             0.0027        +INF            EPS         
+EU .OpD.scrap            .        448707.1622        +INF            EPS         
+EU .RoW.primary          .              .            +INF         -698.0000      
+EU .RoW.scrap            .              .              .            76.0000      
+OpD.EU .primary          .              .            +INF          -32.0000      
+OpD.EU .scrap            .              .            +INF          -76.0000      
+OpD.RoW.primary          .              .            +INF         -730.0000      
+OpD.RoW.scrap            .       2208598.9653        +INF      -1.59162E-12      
+RoW.EU .primary          .       4800000.0027        +INF             .          
+RoW.EU .scrap            .              .            +INF         -626.0000      
+RoW.OpD.primary          .        603418.9973        +INF            EPS         
+RoW.OpD.scrap            .              .            +INF         -626.0000      
+
+
+**** REPORT SUMMARY :        0     NONOPT
+                             0 INFEASIBLE
+                             0  UNBOUNDED
+                             0     ERRORS
+GAMS 54.3.1  61154be4 Aug 21, 2026          WEX-WEI x86 64bit/MS Windows - 11/14/26 13:19:25 Page 12
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+E x e c u t i o n
+
+
+EXECUTION TIME       =        0.250 SECONDS      4 MB  54.3.1 61154be4 WEX-WEI
+
+
+USER: Course License                                 G260809+0003Ac-GEN
+      Colorado School of Mines                                  DCE5587
+      License for teaching and research at degree granting institutions
+
+
+**** FILE SUMMARY
+
+Input      C:\Users\alsmi\OneDrive\Documents\GitHub\EBGN645 Arianna Smith\Aluminum_Trade.gms
+Output     C:\Users\alsmi\OneDrive\Documents\GitHub\EBGN645 Arianna Smith\Aluminum_Trade.lst
